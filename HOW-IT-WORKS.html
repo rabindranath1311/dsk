@@ -150,10 +150,10 @@ footer .accent-rule{margin-bottom:1.4rem}
 
 <header class="masthead">
   <main style="padding-top:0;padding-bottom:0">
-    <p class="breadcrumb">studio &rarr; client tool &rarr; ai &rarr; codebase</p>
+    <p class="breadcrumb">toolkit &rarr; design system &rarr; ai &rarr; codebase</p>
     <p class="kicker">Design system platform / how it works</p>
     <h1>How the system works.</h1>
-    <p class="standfirst">The design system lives as one shared memory. Here is how the studio, the client tool, the AI, and the codebase fit together.</p>
+    <p class="standfirst">The design system lives as one shared memory — a single self-contained toolkit. Here is how the builder, the viewer, the AI, and the codebase fit together.</p>
     <hr class="accent-rule">
   </main>
 </header>
@@ -216,94 +216,71 @@ footer .accent-rule{margin-bottom:1.4rem}
     <div class="inner">
       <div class="hero-frame">
         <svg viewBox="0 0 960 420" role="img" aria-labelledby="g03t g03d" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">
-          <title id="g03t">End-to-end flow from studio to codebase</title>
-          <desc id="g03d">The studio deploys an isolated copy onto the client's machine. Inside, a visual app, a command-line toolkit and an AI connection all sit over one shared-memory store of tokens, components with rules, icons and assets, and screens and flows. The client's AI reads and writes that memory and exports ready-to-use design files into the codebase. Data never leaves the client's machine.</desc>
+          <title id="g03t">End-to-end flow inside one toolkit</title>
+          <desc id="g03d">One self-contained toolkit folder sits on your own machine. Inside, three faces — a builder (the dsk command line), a viewer (dsk serve) and an agent connection (MCP) — all sit over one shared-memory store of tokens, components with rules, icons and assets, and screens and flows. The product's AI reads and writes that memory and exports ready-to-use design files into the codebase. The folder lives beside the code and never leaves your machine.</desc>
           <defs>
             <marker id="ah" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--accent)"/></marker>
           </defs>
 
-          <!-- residency outline -->
-          <rect x="234" y="20" width="710" height="384" rx="14" style="fill:none;stroke:var(--hairline-strong);stroke-width:1.25" stroke-dasharray="2 5" opacity="0.8"/>
-          <text x="248" y="396" style="fill:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.03em">on the client's machine — data never leaves</text>
+          <!-- residency outline: your own machine -->
+          <rect x="16" y="20" width="928" height="384" rx="14" style="fill:none;stroke:var(--hairline-strong);stroke-width:1.25" stroke-dasharray="2 5" opacity="0.8"/>
+          <text x="30" y="396" style="fill:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.03em">on your own machine — the folder lives beside the code and never leaves</text>
 
-          <!-- A: Studio -->
-          <rect x="18" y="86" width="156" height="220" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
-          <text x="34" y="116" style="fill:var(--text);font-family:var(--font-sans);font-size:14px;font-weight:600">Your Studio</text>
-          <text x="34" y="134" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9.5px;letter-spacing:.03em">LEVEL 1 · OUR SIDE</text>
-          <rect x="34" y="150" width="124" height="26" rx="5" style="fill:none;stroke:var(--hairline);stroke-width:1.25"/>
-          <text x="44" y="167" style="fill:var(--secondary);font-family:var(--font-mono);font-size:10px">design system</text>
-          <rect x="34" y="184" width="124" height="26" rx="5" style="fill:none;stroke:var(--hairline);stroke-width:1.25"/>
-          <text x="44" y="201" style="fill:var(--secondary);font-family:var(--font-mono);font-size:10px">recipe</text>
-          <text x="34" y="240" style="fill:var(--muted);font-family:var(--font-sans);font-size:11px">author + fine-tune</text>
+          <!-- toolkit folder container -->
+          <rect x="40" y="48" width="640" height="330" rx="12" style="fill:none;stroke:var(--hairline-strong);stroke-width:1.5" stroke-dasharray="2 4"/>
+          <text x="58" y="74" style="fill:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:600">One toolkit · one design system</text>
+          <text x="58" y="91" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px;letter-spacing:.02em">SELF-CONTAINED FOLDER · RUNS LOCALLY</text>
 
-          <!-- dashed boundary -->
-          <line x1="234" y1="20" x2="234" y2="404" style="stroke:var(--hairline-strong);stroke-width:1.25" stroke-dasharray="3 5"/>
-          <text x="240" y="40" style="fill:var(--muted);font-family:var(--font-mono);font-size:9.5px">client's machine &rarr;</text>
-
-          <!-- Arrow 1 deploy -->
-          <path d="M174 176 H300" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
-          <!-- stamp glyph -->
-          <g transform="translate(196,148)">
-            <rect x="4" y="4" width="16" height="20" rx="3" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
-            <rect x="0" y="0" width="16" height="20" rx="3" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
-          </g>
-          <rect x="186" y="184" width="116" height="20" rx="6" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1"/>
-          <text x="244" y="198" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px" text-anchor="middle">deploy — isolated copy</text>
-
-          <!-- B: client container -->
-          <rect x="306" y="62" width="404" height="300" rx="12" style="fill:none;stroke:var(--hairline-strong);stroke-width:1.5" stroke-dasharray="2 4"/>
-          <text x="322" y="84" style="fill:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:600">Client's machine</text>
-          <text x="322" y="100" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px;letter-spacing:.02em">LEVEL 2 · ONE PRODUCT · RUNS LOCALLY</text>
-
-          <!-- three tabs -->
+          <!-- three faces (tabs) -->
           <g style="font-family:var(--font-sans);font-size:11px">
-            <rect x="322" y="112" width="118" height="30" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
-            <text x="381" y="131" style="fill:var(--secondary)" text-anchor="middle">Visual app</text>
-            <rect x="448" y="112" width="118" height="30" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
-            <text x="507" y="127" style="fill:var(--secondary)" text-anchor="middle">Toolkit</text>
-            <text x="507" y="138" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">CLI</text>
-            <rect x="574" y="112" width="120" height="30" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
-            <text x="634" y="127" style="fill:var(--secondary)" text-anchor="middle">AI connection</text>
-            <text x="634" y="138" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">MCP</text>
+            <rect x="58" y="104" width="192" height="34" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+            <text x="154" y="120" style="fill:var(--secondary)" text-anchor="middle">Builder</text>
+            <text x="154" y="132" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">CLI · dsk</text>
+            <rect x="262" y="104" width="192" height="34" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+            <text x="358" y="120" style="fill:var(--secondary)" text-anchor="middle">Viewer</text>
+            <text x="358" y="132" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">dsk serve</text>
+            <rect x="466" y="104" width="192" height="34" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+            <text x="562" y="120" style="fill:var(--secondary)" text-anchor="middle">Agent connection</text>
+            <text x="562" y="132" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">MCP</text>
           </g>
-          <!-- down arrows -->
-          <path d="M381 142 V172" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
-          <path d="M507 142 V172" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
-          <path d="M634 142 V172" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <!-- down arrows into store -->
+          <path d="M154 138 V166" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <path d="M358 138 V166" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <path d="M562 138 V166" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
 
-          <!-- slab -->
-          <rect x="322" y="178" width="372" height="92" rx="8" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1.5"/>
-          <rect x="322" y="178" width="3" height="92" style="fill:var(--accent)"/>
-          <text x="334" y="198" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:10px;letter-spacing:.03em">SHARED MEMORY · source of truth</text>
+          <!-- shared memory slab -->
+          <rect x="58" y="172" width="600" height="92" rx="8" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1.5"/>
+          <rect x="58" y="172" width="3" height="92" style="fill:var(--accent)"/>
+          <text x="70" y="192" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:10px;letter-spacing:.03em">SHARED MEMORY · source of truth</text>
           <g style="font-family:var(--font-mono);font-size:9.5px">
-            <line x1="416" y1="208" x2="416" y2="260" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
-            <line x1="508" y1="208" x2="508" y2="260" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
-            <line x1="600" y1="208" x2="600" y2="260" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
-            <text x="369" y="237" style="fill:var(--accent-text)" text-anchor="middle">Tokens</text>
-            <text x="462" y="231" style="fill:var(--accent-text)" text-anchor="middle">Components</text>
-            <text x="462" y="243" style="fill:var(--accent-text)" text-anchor="middle">+ rules</text>
-            <text x="554" y="231" style="fill:var(--accent-text)" text-anchor="middle">Icons &amp;</text>
-            <text x="554" y="243" style="fill:var(--accent-text)" text-anchor="middle">assets</text>
-            <text x="647" y="231" style="fill:var(--accent-text)" text-anchor="middle">Screens</text>
-            <text x="647" y="243" style="fill:var(--accent-text)" text-anchor="middle">&amp; flows</text>
+            <line x1="208" y1="202" x2="208" y2="254" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
+            <line x1="358" y1="202" x2="358" y2="254" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
+            <line x1="508" y1="202" x2="508" y2="254" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
+            <text x="133" y="231" style="fill:var(--accent-text)" text-anchor="middle">Tokens</text>
+            <text x="283" y="225" style="fill:var(--accent-text)" text-anchor="middle">Components</text>
+            <text x="283" y="237" style="fill:var(--accent-text)" text-anchor="middle">+ rules</text>
+            <text x="433" y="225" style="fill:var(--accent-text)" text-anchor="middle">Icons &amp;</text>
+            <text x="433" y="237" style="fill:var(--accent-text)" text-anchor="middle">assets</text>
+            <text x="583" y="225" style="fill:var(--accent-text)" text-anchor="middle">Screens</text>
+            <text x="583" y="237" style="fill:var(--accent-text)" text-anchor="middle">&amp; flows</text>
           </g>
 
-          <!-- C: AI assistant node + read/write -->
-          <rect x="322" y="292" width="200" height="56" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
-          <text x="334" y="316" style="fill:var(--text);font-family:var(--font-sans);font-size:12px;font-weight:600">Client's AI assistant</text>
-          <text x="334" y="333" style="fill:var(--muted);font-family:var(--font-mono);font-size:9.5px">builds the feature</text>
-          <!-- double arrow from MCP tab down to AI -->
-          <path d="M628 270 V288 H440 V290" style="stroke:var(--accent);stroke-width:1.5;fill:none" marker-end="url(#ah)"/>
-          <path d="M452 290 V288 H640 V270" style="stroke:var(--accent);stroke-width:1.5;fill:none" marker-end="url(#ah)"/>
-          <text x="566" y="282" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px" text-anchor="middle">read</text>
-          <text x="500" y="304" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px" text-anchor="middle">write back</text>
+          <!-- AI assistant node + read/write -->
+          <rect x="58" y="286" width="240" height="56" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+          <text x="70" y="310" style="fill:var(--text);font-family:var(--font-sans);font-size:12px;font-weight:600">Product's AI assistant</text>
+          <text x="70" y="327" style="fill:var(--muted);font-family:var(--font-mono);font-size:9.5px">builds the feature</text>
+          <!-- read / write back between store and AI -->
+          <path d="M150 264 V284" style="stroke:var(--accent);stroke-width:1.5;fill:none" marker-end="url(#ah)"/>
+          <path d="M206 284 V264" style="stroke:var(--accent);stroke-width:1.5;fill:none" marker-end="url(#ah)"/>
+          <text x="150" y="279" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">read</text>
+          <text x="228" y="279" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">write back</text>
 
-          <!-- D: export out -->
-          <path d="M710 234 H812" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
-          <rect x="724" y="210" width="174" height="20" rx="6" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1"/>
-          <text x="811" y="224" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">export — design files</text>
+          <!-- export to codebase -->
+          <rect x="694" y="214" width="150" height="20" rx="6" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1"/>
+          <text x="769" y="228" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">export — design files</text>
+          <path d="M680 250 H812" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
           <!-- codebase glyph -->
-          <g transform="translate(820,250)">
+          <g transform="translate(816,236)">
             <rect x="0" y="0" width="120" height="80" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
             <text x="12" y="20" style="fill:var(--text);font-family:var(--font-sans);font-size:11px;font-weight:600">Codebase</text>
             <rect x="12" y="30" width="96" height="13" rx="3" style="fill:none;stroke:var(--hairline);stroke-width:1"/>
@@ -315,27 +292,28 @@ footer .accent-rule{margin-bottom:1.4rem}
           </g>
         </svg>
       </div>
-      <p class="caption" style="text-align:center">studio &rarr; deploy &rarr; client's machine &rarr; ai reads/writes &rarr; export to codebase</p>
-      <p class="legend">— accent traces the live path · dashed border = the client's machine</p>
+      <p class="caption" style="text-align:center">one toolkit folder &rarr; ai reads/writes the shared memory &rarr; export to codebase</p>
+      <p class="legend">— accent traces the live path · dashed border = your own machine</p>
     </div>
   </div>
 
-  <!-- 04 THREE PARTS -->
+  <!-- 04 ONE TOOLKIT, THREE FACES -->
   <section id="s04" aria-labelledby="h04">
     <div class="sec-head">
       <span class="numeral">03</span>
-      <p class="kicker">The three parts</p>
-      <h2 id="h04">Studio, client tool, and the data.</h2>
+      <p class="kicker">One toolkit, three faces</p>
+      <h2 id="h04">Builder, viewer, and the agent connection.</h2>
     </div>
+    <p class="body">It's a single, self-contained toolkit for <strong>one</strong> product's design system — one folder you can keep right alongside the code. There's no separate studio managing many projects; the toolkit <em>is</em> the design system, and you use it three ways.</p>
     <div class="rows">
       <div class="row">
         <span class="rnum">1</span>
         <div class="rbody">
           <h3>
             <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            The Studio <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">our side</span>
+            The builder <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">cli · dsk</span>
           </h3>
-          <p>We set up and fine-tune a client's design system from their existing notes — shaping components and the rules for using them — then deliver their own copy.</p>
+          <p>A command-line toolkit (<span class="mono">dsk</span>) to create and shape the design system — its tokens, its components, and the rules for using them. This is the machine that helps you <em>build</em> the design system.</p>
         </div>
       </div>
       <div class="row">
@@ -343,9 +321,9 @@ footer .accent-rule{margin-bottom:1.4rem}
         <div class="rbody">
           <h3>
             <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            The Client Tool <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">their side</span>
+            The viewer <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">dsk serve</span>
           </h3>
-          <p>The copy each client runs on their own machine, used three ways: a visual app to see and play with the whole system, a hands-on toolkit for direct or automated work, and a live connection their AI assistant plugs into. Each copy is locked to one product.</p>
+          <p>A visual app (<span class="mono">dsk serve</span>) that opens straight into this design system: browse the tokens, the components atom-to-template with their usage rules, and map out screens and user flows.</p>
         </div>
       </div>
       <div class="row">
@@ -353,7 +331,17 @@ footer .accent-rule{margin-bottom:1.4rem}
         <div class="rbody">
           <h3>
             <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            The Data
+            The agent's live connection <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">mcp</span>
+          </h3>
+          <p>An <span class="mono">MCP</span> link the product's AI assistant plugs into, so that <em>after</em> the design system is built, the AI reads from and writes back to it while it codes.</p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="rnum" style="font-size:1.4rem">+</span>
+        <div class="rbody">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            The data <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">alongside</span>
           </h3>
           <p>Supporting material — brand guides, product specs — sitting alongside the system so the AI has the full picture, not just the parts.</p>
         </div>
@@ -365,24 +353,24 @@ footer .accent-rule{margin-bottom:1.4rem}
   <section id="s05" aria-labelledby="h05">
     <div class="sec-head">
       <span class="numeral">04</span>
-      <p class="kicker">What's inside the client tool</p>
+      <p class="kicker">What's inside</p>
       <h2 id="h05">A box of parts — with instructions.</h2>
     </div>
     <p class="lead">Not just a box of parts — a box of parts with instructions.</p>
     <div class="svg-block">
       <svg viewBox="0 0 720 300" role="img" aria-labelledby="g05t g05d" preserveAspectRatio="xMidYMid meet">
-        <title id="g05t">Exploded stack of the client tool</title>
-        <desc id="g05d">Three thin equal tabs — visual app, toolkit and AI connection — each drop a connector into one wide shared store slab partitioned into four cells: tokens, components plus rules, icons and assets, and screens and flows.</desc>
+        <title id="g05t">Exploded stack of the toolkit</title>
+        <desc id="g05d">Three thin equal tabs — builder, viewer and agent connection — each drop a connector into one wide shared store slab partitioned into four cells: tokens, components plus rules, icons and assets, and screens and flows.</desc>
         <defs>
           <marker id="ah-05" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--accent)"/></marker>
         </defs>
         <g style="font-family:var(--font-sans);font-size:13px">
           <rect x="60" y="24" width="180" height="40" rx="8" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
-          <text x="150" y="49" style="fill:var(--secondary)" text-anchor="middle">Visual app</text>
+          <text x="150" y="49" style="fill:var(--secondary)" text-anchor="middle">Builder</text>
           <rect x="270" y="24" width="180" height="40" rx="8" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
-          <text x="360" y="49" style="fill:var(--secondary)" text-anchor="middle">Toolkit</text>
+          <text x="360" y="49" style="fill:var(--secondary)" text-anchor="middle">Viewer</text>
           <rect x="480" y="24" width="180" height="40" rx="8" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
-          <text x="570" y="49" style="fill:var(--secondary)" text-anchor="middle">AI connection</text>
+          <text x="570" y="49" style="fill:var(--secondary)" text-anchor="middle">Agent connection</text>
         </g>
         <g style="stroke:var(--accent);stroke-width:2;fill:none">
           <path d="M150 64 V104" marker-end="url(#ah-05)"/>
@@ -432,7 +420,7 @@ footer .accent-rule{margin-bottom:1.4rem}
       <p class="kicker">How the AI plugs in</p>
       <h2 id="h06">A live link, not a stale copy.</h2>
     </div>
-    <p class="body">The client's AI connects through a live link — an <span class="mono">MCP</span> connection, the standard way AI assistants use outside tools. Through it, while it builds, the AI can:</p>
+    <p class="body">The product's AI connects through a live link — an <span class="mono">MCP</span> connection, the standard way AI assistants use outside tools. Through it, while it builds, the AI can:</p>
     <div class="verbs">
       <div class="verb"><span class="vt">LOOK THINGS UP</span><p>"Which component fits here?" "What's the right spacing value?"</p></div>
       <div class="verb"><span class="vt">GET ITS PLAN CHECKED</span><p>The tool flags anything that breaks the design rules <strong>before</strong> a line of code is written.</p></div>
@@ -459,11 +447,11 @@ footer .accent-rule{margin-bottom:1.4rem}
       <h2 id="h07">From setup to a self-enriching loop.</h2>
     </div>
     <ol class="steps">
-      <li>We set up a client's design system in the Studio and hand them their own copy.</li>
-      <li>They open the visual app to explore the system and plan a feature — sketching screens and flows, picking components.</li>
-      <li>The tool bundles exactly what's relevant and hands it to the client's AI.</li>
+      <li>Set up the design system with the builder — start from existing notes, then shape the components and the rules for using them.</li>
+      <li>Open the visual app to explore the system and plan a new feature — sketching the screens and flows, and picking the components it needs.</li>
+      <li>The tool bundles up exactly what's relevant and hands it to the AI assistant.</li>
       <li>The AI builds the feature — checking each choice against the rules as it goes — and files anything new back into the shared memory.</li>
-      <li>The updated system is automatically written into their codebase as ready-to-use design files.</li>
+      <li>The updated design system is automatically written into the codebase as ready-to-use design files.</li>
     </ol>
     <div class="loop-wrap">
       <svg viewBox="0 0 360 360" role="img" aria-labelledby="g07t g07d" preserveAspectRatio="xMidYMid meet">
@@ -548,10 +536,10 @@ footer .accent-rule{margin-bottom:1.4rem}
       <div class="row" style="grid-template-columns:1fr">
         <div class="rbody">
           <h3 style="display:flex;align-items:center;gap:.55rem">
-            The data stays with the client
+            The data stays with you
             <svg width="16" height="16" viewBox="0 0 16 16" role="img" aria-label="lock"><rect x="3" y="7" width="10" height="7" rx="1.5" style="fill:none;stroke:var(--accent);stroke-width:1.5"/><path d="M5 7 V5 a3 3 0 0 1 6 0 V7" style="fill:none;stroke:var(--accent);stroke-width:1.5"/></svg>
           </h3>
-          <p>Each client runs their own copy on their own machine; their design system never leaves their hands.</p>
+          <p>It's one self-contained folder on your own machine — the design system lives beside the code and never leaves your hands.</p>
         </div>
       </div>
     </div>

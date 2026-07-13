@@ -1,6 +1,6 @@
-# Studio visual + editor spec (ported from Second Brain work mode)
+# Viewer visual + editor spec (ported from Second Brain work mode)
 
-Reference for building the Layer 1 Studio UI. Aesthetic: "terminal / brutalist research-lab", Linear-Midnight dark.
+Reference for building the `dsk serve` viewer — the React visualizer for a single design system. It boots straight into the current project (one folder = one design system); there is no project picker or home screen. Aesthetic: "terminal / brutalist research-lab", Linear-Midnight dark.
 
 ## Palette (CSS vars)
 ```css
@@ -22,7 +22,7 @@ Reference for building the Layer 1 Studio UI. Aesthetic: "terminal / brutalist r
 - Borders are hairlines (`--line` / `--line-soft`). Cards: `1px solid --line`, bg `--paper`, shadow `0 2px 4px rgba(0,0,0,.4)`.
 
 ## App shell
-Grid: `232px 1fr [log 340px]` cols; rows `38px topbar / 1fr / 22px status`. Sidebar = Create button (lime) + nav groups (uppercase headings + items). Mode switch = segmented control (personal|work) persisted to localStorage, reflected as `data-mode`. For the studio, the analog is a PROJECT SWITCHER at the top of the sidebar + a "Studio home" listing all projects.
+Grid: `232px 1fr [log 340px]` cols; rows `38px topbar / 1fr / 22px status`. Sidebar = Create button (lime) + nav groups (uppercase headings + items). The viewer has no mode switch and no project picker — it opens directly into the one design system, so the top of the sidebar simply shows the project name (the current design system), then the nav groups below. (In the Second Brain source this slot held a segmented mode control persisted to localStorage; the single-project viewer drops it.)
 
 ## Token gallery (grouped by group)
 - color: `repeat(auto-fill,minmax(96px,1fr))` grid; chip 56px tall swatch + name + mono value.

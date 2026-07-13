@@ -1,8 +1,14 @@
 # Implementation Plan
 
-**Status:** Draft v1 · **Date:** 2026-06-30 · Companion to [ARCHITECTURE_PRD.md](ARCHITECTURE_PRD.md)
+**Status:** v2 (post-pivot) · **Date:** 2026-07-13 · Companion to [ARCHITECTURE_PRD.md](ARCHITECTURE_PRD.md)
 
 Working CLI name `dsk` is a placeholder until the product is named.
+
+> **2026-07-13 pivot.** The earlier three-level framing — with a Level 1 "Studio"/factory that stamped and updated isolated client copies — is gone; that code was deleted. The project is now **one self-contained CLI toolkit per design system** (one folder = one design system), built as three faces over a single `@dsk/core`:
+> - **BUILDER** — the `dsk` CLI (`init`, `token set`, `component new`, `pattern`, `guideline`, `import`, `export`, `feature`, `recommend`, `lint`) plus MCP authoring tools.
+> - **VIEWER** — `dsk serve`: a React visualizer that boots straight into the current project (no project picker).
+> - **THE DESIGN SYSTEM ITSELF** — the store: a human-readable markdown file repo (`dsk init --files`) or SQLite. The living design-system memory.
+> - **AGENT SURFACE** — MCP-over-HTTP from `dsk serve` (10 tools) plus exports (`design.md`, `AGENTS.md`, `tokens.css`, `SKILL.md`, `.mcp.json`).
 
 ---
 
@@ -10,15 +16,15 @@ Working CLI name `dsk` is a placeholder until the product is named.
 
 - **Build the walking skeleton first.** The thinnest end-to-end slice that proves "the store is the source of truth → exports" before any polish.
 - **Prove the agent loop early (Milestone 2), not last.** The whole thesis is "a real Claude Code session reads/writes/lints against the memory." We demo that as soon as possible.
-- **Build Level 2 fully before Level 1.** The client tool is the core value; you act as your own first "client." The studio/factory (L1) comes after the L2 loop works end-to-end.
-- **One package, local-first.** No server to host, no LLM inside the tool. The store is a SQLite file in the repo; exports are git-tracked text beside it.
+- **One folder = one design system.** No levels, no factory, no multi-project orchestrator. Each design system is a single self-contained toolkit you run in its own folder; you act as your own first user.
+- **One package, local-first.** No server to host, no LLM inside the tool. The store is a SQLite file (or a markdown file repo) in the folder; exports are git-tracked text beside it.
 - **Dogfood.** We build it with Claude Code, and use its own MCP/exports on itself as soon as M2 lands.
 
 ---
 
 ## 2. The one decision to make up front: the stack
 
-**Recommendation: a TypeScript / Node monorepo for Level 2.**
+**Recommendation: a TypeScript / Node monorepo.**
 
 Why TS/Node over reusing the Second Brain Python stack:
 - One language across the core, CLI, MCP server, and React visualizer → a single shippable package the client runs.
@@ -30,7 +36,7 @@ What we reuse from Second Brain becomes **design/logic reference, not copied cod
 
 > Alternative (if speed-to-first-demo matters more than a clean foundation): reuse the Second Brain Python backend + vanilla-JS frontend as-is for a fast prototype. The cost is a split Python+TS stack, clunkier client distribution, and growing the 7,925-line `app.js` the review already flagged. I don't recommend it for the real build — but it's a valid 1-week spike.
 
-**This is the decision to confirm before any code.** Everything below assumes TS/Node.
+**This was the load-bearing decision, now settled.** The build is TS/Node throughout.
 
 ---
 
@@ -38,20 +44,19 @@ What we reuse from Second Brain becomes **design/logic reference, not copied cod
 
 ```
 dsk/                     ← pnpm workspace (+ turbo optional)
-├── packages/
-│   ├── core/            ← THE KERNEL — depends on nothing in here
-│   │   ├── store/       ← SQLite (better-sqlite3): nodes + edges, migrations
-│   │   ├── model/       ← Node types, kinds, DTCG token logic
-│   │   ├── domain/      ← validation, naming-lint, recommend + lint_usage engine
-│   │   └── export/      ← tokens→CSS/Tailwind (Style Dictionary), design.md/skills/agents.md
-│   ├── cli/             ← `dsk` command (built on core) — clipanion/commander
-│   ├── mcp/             ← MCP server (TS SDK) wrapping core ops — stdio + HTTP
-│   ├── server/          ← `dsk serve`: local HTTP (Hono) = web build + JSON API + /mcp
-│   └── web/             ← React visualizer (Vite + React + TS), talks to server API
-└── (studio/ added at M5 for Level 1)
+└── packages/
+    ├── core/            ← @dsk/core, THE KERNEL — depends on nothing in here
+    │   ├── store/       ← SQLite (better-sqlite3) or markdown files: nodes + edges, migrations
+    │   ├── model/       ← Node types, kinds, DTCG token logic
+    │   ├── domain/      ← validation, naming-lint, recommend + lint_usage engine
+    │   └── export/      ← tokens→CSS/Tailwind (Style Dictionary), design.md/AGENTS.md/SKILL.md
+    ├── cli/             ← @dsk/cli — the `dsk` BUILDER command (built on core)
+    ├── mcp/             ← @dsk/mcp — MCP server (TS SDK) wrapping core ops — stdio + HTTP
+    ├── server/          ← @dsk/server — `dsk serve`: local HTTP (Hono) = web + JSON API + /mcp
+    └── web/             ← @dsk/web — React visualizer (Vite + React + TS), the VIEWER
 ```
 
-`core` is the single source of truth logic; `cli`, `mcp`, `server`, `web` are all thin faces over it. This is the "one core, three faces" architecture made literal.
+`core` is the single source-of-truth logic; `cli`, `mcp`, `server`, `web` are all thin faces over it — the BUILDER (`dsk` CLI + MCP authoring), the VIEWER (`dsk serve`), and the AGENT SURFACE (MCP-over-HTTP + exports), all over the one store. This is the "three faces over one core" architecture made literal.
 
 ---
 
@@ -67,7 +72,7 @@ nodes(
   level     TEXT,               -- atom | molecule | organism | template  (components only)
   data      JSON,               -- typed payload per kind (the "meta" bag)
   body      TEXT,               -- markdown notes
-  origin    TEXT,               -- recipe | client  (for the L1 factory merge later)
+  origin    TEXT,               -- DORMANT: leftover from the removed factory; slated for removal
   created   TEXT, updated TEXT
 );
 edges(
@@ -83,7 +88,7 @@ Typed payloads (`data`):
 - **guideline** — `{ rule, scope, governs[] }`.
 - **screen** — `{ purpose, states[], uiElements[] }`.
 - **flow** — `{ nodes[], edges[], sections[] }`.
-- **doc** — `{ source, text }` (Level-3 reference material).
+- **doc** — `{ source, text }` (imported reference material).
 
 The **decision index** (intent → component) is derived by querying components' `intents[]` + `usage`, not stored separately.
 
@@ -91,44 +96,45 @@ The **decision index** (intent → component) is derived by querying components'
 
 ## 5. Build sequence (milestones)
 
-| # | Milestone | What we build | Proves |
-|---|---|---|---|
-| **M0** | Walking skeleton | monorepo + `core` (SQLite, nodes/edges, token CRUD) + `dsk` CLI (`init`/`token`/`export`) + DTCG→CSS exporter + basic `design.md` | Edit a token → `tokens.css` + `design.md` regenerate. Store is the source of truth. |
-| **M1** | Components + definition layer | `component`/`pattern`/`guideline` kinds + usage metadata + decision index + the rich `design.md` + a skill file | A component's usage rules round-trip into agent-readable form. |
-| **M2** | MCP + steering (the thesis) | `mcp` stdio server: `search`, `get_component`, `list_tokens`, `recommend_component`, `component_guidance`, `create_component`, `lint_usage` + generated `.mcp.json` | In a real Claude Code session, the agent recommends, lints, and writes a component back — live. |
-| **M3** | React visualizer | `dsk serve` (server + web + `/mcp`) + token gallery (visualized) + component browser with usage rules, editable | Open `localhost`, edit the design system visually, exports regenerate. |
-| **M4** | IA + flows (the add-on) | `screen`/`flow` kinds + React flow/IA canvas (port the Second Brain editor design) + `build_feature_prompt` (CLI + MCP) | Sketch a feature flow → scoped spec → Claude Code builds it. |
-| **M5** | Studio + factory (Level 1) | L1 studio (multi-project) + recipe manifest + `dsk deploy` (stamp an isolated copy) + visibility tiers + the Second Brain bridge | Onboard a project and stamp an isolated client copy. |
+| # | Milestone | What we build | Face | Status |
+|---|---|---|---|---|
+| **M0** | Walking skeleton | monorepo + `core` (SQLite, nodes/edges, token CRUD) + `dsk` CLI (`init`/`token`/`export`) + DTCG→CSS exporter + basic `design.md` | Store + BUILDER | ✅ Done — edit a token → `tokens.css` + `design.md` regenerate; the store is the source of truth. |
+| **M1** | Components + definition layer | `component`/`pattern`/`guideline` kinds + usage metadata + decision index + the rich `design.md` + a skill file | Store + BUILDER | ✅ Done — a component's usage rules round-trip into agent-readable form. |
+| **M2** | MCP + agent surface (the thesis) | `mcp` server (stdio + HTTP): `search`, `get_component`, `list_tokens`, `recommend_component`, `component_guidance`, `create_component`, `lint_usage`, … (10 tools) + generated `.mcp.json` | AGENT SURFACE | ✅ Done — in a real Claude Code session the agent recommends, lints, and writes a component back, live. |
+| **M3** | React visualizer | `dsk serve` (server + web + `/mcp`) boots straight into the current project + token gallery + editable component browser with usage rules | VIEWER | ✅ Done — open `localhost`, edit the design system visually, exports regenerate. |
+| **M4** | IA + flows (the add-on) | `screen`/`flow` kinds + React flow/IA canvas + `build_feature_prompt` / `dsk feature` (CLI + MCP) | BUILDER + VIEWER | ✅ Done — sketch a feature flow → scoped spec → Claude Code builds it. |
+| **M5** | Installable toolkit | publish `@dsk/*` to npm — or ship a single compiled binary — so a user runs `dsk` in their own design-system folder without the monorepo | Packaging | ⏳ Next — the real "installable toolkit" step. |
 
-M0–M4 build Level 2 completely; M5 adds Level 1. The agent loop (M2) is proven less than halfway through.
-
----
-
-## 6. The first week (M0, concretely)
-
-1. Confirm the stack (Section 2) and reserve a name/namespace.
-2. `pnpm` workspace + `packages/core`: `better-sqlite3`, the `nodes`/`edges` schema + a migration runner, a `Node` type, token CRUD, one Vitest test.
-3. DTCG→CSS exporter (start hand-rolled or Style Dictionary) + a `design.md` generator.
-4. `packages/cli`: `dsk init`, `dsk token set/list`, `dsk export`.
-5. Run it in a throwaway repo: `dsk init` → `dsk token set color.brand.primary "#1F6FEB"` → `dsk export` writes `tokens.css` + `design.md`. **M0 done.**
-
-That's a self-contained first PR that makes the core thesis tangible.
+M0–M4 are complete: the single toolkit's store, BUILDER, VIEWER, and AGENT SURFACE all work end-to-end. Typecheck is clean across all 5 packages and 26 Vitest tests pass; the toolkit round-trips the full model (tokens, components, patterns, guidelines, IA, flows, docs, assets). M5 — making it installable outside the monorepo — is the one substantive piece of work left.
 
 ---
 
-## 7. Decisions to settle (the details to talk through)
+## 6. What's left (concretely)
 
-1. **Stack** — TS/Node clean build (recommended) vs reuse Second Brain Python for a fast spike. *Load-bearing; confirm first.*
-2. **Store on disk** — single SQLite file committed in the repo (recommended) vs files-as-truth+index vs SQLite + a JSON snapshot for git diffs. (Exports are git-friendly text either way.)
-3. **First export target** — CSS variables + `design.md` baseline (recommended); add Tailwind/React component scaffolds when a real consumer needs them.
-4. **MCP transport** — stdio first (simplest for Claude Code), add local HTTP once `dsk serve` exists (recommended).
-5. **L2-first** — build the client tool fully, then L1 (recommended) vs scaffold the studio in parallel.
-6. **Name + namespace** — blocks nothing, but fixes package names.
+All five packages — `@dsk/core`, `@dsk/cli`, `@dsk/mcp`, `@dsk/server`, `@dsk/web` — exist and work. Typecheck is clean across all five; 26 Vitest tests pass; the toolkit round-trips the full model. The genuinely-remaining work:
+
+1. **Make it installable (M5).** Publish `@dsk/*` to npm — or ship a single compiled binary — so a user runs `dsk` inside their own design-system folder without cloning the monorepo. This is the real "installable toolkit" step and the one substantive milestone left.
+2. **Strip the dormant fields.** The model still carries unused `origin` / `visibility` / `config.recipe` fields left over from the removed factory. Remove them from the schema, model, migrations, and exporters.
+3. **Name the product.** `dsk` is still a placeholder; pick a real name + npm namespace before publishing.
+
+That's the shortlist between "works in the monorepo" and "a design-system team installs `dsk` and runs it in their own folder."
+
+---
+
+## 7. Decisions (mostly settled)
+
+These were the open questions during the build; all but the last are now resolved.
+
+1. **Stack** — ✅ TS/Node clean build. *(Was load-bearing; done.)*
+2. **Store on disk** — ✅ both shipped: SQLite by default, or a human-readable markdown file repo via `dsk init --files`. (Exports are git-friendly text either way.)
+3. **First export target** — ✅ CSS variables + `design.md` baseline, plus `AGENTS.md` / `SKILL.md` / `.mcp.json`; Tailwind via Style Dictionary.
+4. **MCP transport** — ✅ stdio first, plus local HTTP served from `dsk serve`.
+5. **Name + namespace** — ⏳ still open; `dsk` is a placeholder and blocks publishing under a real npm namespace.
 
 ---
 
 ## 8. How we build it together
 
-We build with Claude Code, milestone by milestone. The moment M2 lands, we point a Claude Code session at the generated `.mcp.json` and have it build a component against the memory — dogfooding the thesis immediately. Each milestone ends with a runnable demo, not just code.
+We build with Claude Code, milestone by milestone. Since M2 landed, we point a Claude Code session at the generated `.mcp.json` and have it build a component against the memory — dogfooding the thesis directly. Each milestone ends with a runnable demo, not just code.
 
-Suggested first move: confirm the stack, then I scaffold M0 (the monorepo + core + the `dsk init/token/export` slice) so you can see `tokens.css` + `design.md` generated from the store on day one.
+Suggested next move: pick the name + namespace, then publish `@dsk/*` (or a single compiled binary) so `dsk serve` and the BUILDER CLI run standalone in any design-system folder — the M5 installable step. After that, strip the dormant `origin` / `visibility` / `config.recipe` fields.

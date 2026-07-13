@@ -1,6 +1,6 @@
-# Design System Platform — Architecture PRD
+# Design System Toolkit — Architecture PRD
 
-**Status:** Draft v1 · **Date:** 2026-06-29 · **Owner:** klikitat.tech
+**Status:** Draft v2 · **Date:** 2026-07-13 (single-toolkit pivot) · **Owner:** klikitat.tech
 
 Each section gives the technical detail first, then a `> In plain words:` explanation directly below it.
 
@@ -8,29 +8,29 @@ Each section gives the technical detail first, then a `> In plain words:` explan
 
 ## 0. TL;DR
 
-A 3-layer platform that turns a design system into **structured memory an AI agent can read and write over MCP**, instead of scattered `design.md` files. You (the studio) author and fine-tune a client's design system in **Level 1**, then stamp out an **isolated Level 2 tool** the client runs locally and connects their own Claude Code to. The tool itself contains no AI — it's a backend: a store, an MCP server, exporters, and a thin UI. The agent lives in the client's Claude Code.
+One self-contained CLI toolkit per design system. **One folder = one design system.** No orchestrator, no client copies, no multi-project studio — just a single package (`@dsk/core`) with the design-system store at its center and **three faces** over it: a **Builder** (`dsk` CLI) that helps you build the system, a **Viewer** (`dsk serve`, a React app) that boots straight into the current project, and an **Agent surface** (MCP-over-HTTP + a static export bundle) so an AI agent can read the system or drive it live. The store — a human-readable markdown file repo (or SQLite) — *is* the living design-system memory; everything else is a projection of it. The toolkit contains no AI: it holds, serves, and checks; the thinking is done by whatever agent (Claude Code) connects to it.
 
-> In plain words: We're building a "brain" for a product's design system. You set it up for a client, hand them a copy, and their AI coding assistant uses that brain to build their app consistently. The brain doesn't think on its own — it remembers, answers, and checks. The thinking is done by the client's AI.
+> In plain words: This is a "brain" for one design system, living in one folder. It's a command-line kit for building the system, a web app for seeing and playing with it, and an AI connection — all wrapped around one shared rulebook stored as plain files. The kit itself doesn't think; it remembers, answers, and checks. The thinking is done by your AI.
 
 ---
 
 ## 1. Problem, goals, non-goals
 
-**Problem.** Enterprise teams build software with AI agents (Claude Code), but the agent has no reliable, structured source of truth for the design system. `design.md` files drift, go stale, and can't be queried ("which component should I use here?"). Designers can't easily keep them in sync, and agents make inconsistent choices.
+**Problem.** Teams build software with AI agents (Claude Code), but the agent has no reliable, structured source of truth for the design system. `design.md` files drift, go stale, and can't be queried ("which component should I use here?"). Designers can't easily keep them in sync, and agents make inconsistent choices.
 
 **Goals.**
 1. A single structured source of truth for tokens, components, patterns, IA, and flows — queryable by an agent.
-2. Author once (Level 1), deliver an isolated, consistent per-client copy (Level 2).
-3. Keep the client's design data on the client's machine (enterprise residency).
-4. Make the system *actively steer* the agent's decisions, not just store data.
-5. Export to the formats real codebases consume (CSS/Tailwind tokens, skills, `CLAUDE.md`).
+2. Keep it self-contained: one folder holds the whole design system, editable by hand and by tool.
+3. Make the system *actively steer* the agent's decisions, not just store data.
+4. Store the design system as human-readable files that live under git alongside (or as) the project.
+5. Export to the formats real codebases consume (CSS/Tailwind tokens, skills, `AGENTS.md`).
 
 **Non-goals.**
-- Not an AI agent or assistant. No model runs inside the tool.
+- Not an AI agent or assistant. No model runs inside the toolkit.
 - Not a pixel design canvas. Screens/flows are information architecture, not mockups. (Tokens *are* visualized.)
-- Not a multi-tenant SaaS for client data — clients run their own copy.
+- Not a multi-project orchestrator or hosted SaaS. There is no studio/factory that manages many design systems or stamps out copies.
 
-> In plain words: AI assistants build apps but keep guessing at design decisions because the rules live in messy text files. We give them one tidy, reliable rulebook — set up by us, owned and run by the client, that their AI can look things up in and get checked against. We are not building another chatbot or a Figma.
+> In plain words: AI assistants build apps but keep guessing at design decisions because the rules live in messy text files. We give them one tidy, reliable rulebook — kept in a single folder, editable by a person or a tool, that their AI can look things up in and get checked against. We are not building another chatbot, a Figma, or a multi-tenant platform.
 
 ---
 
@@ -38,56 +38,49 @@ A 3-layer platform that turns a design system into **structured memory an AI age
 
 The whole architecture rests on three decisions:
 
-**Bet 1 — One kernel, two roles.** Level 1 (Studio) and Level 2 (client tool) are the *same codebase*, switched by an environment flag (`DSK_ROLE` / `PROJECT_LOCK`). Studio = unlocked, sees all projects. Client = locked to one project, fewer edit capabilities. No fork, no second tool to maintain.
+**Bet 1 — One folder, one design system.** The toolkit is self-contained: a single package (`@dsk/core`) whose store, CLI, viewer, and MCP server all point at one design system living in one directory. No orchestrator, no locked "client copies," no environment-role switch — the whole thing *is* the design system you're working on, and shipping it means handing over the folder.
 
-**Bet 2 — The store is the single source of truth; everything else is a projection.** The structured database *is* the design-system memory. The UI editors, the exported `design.md`/skills/CSS, and the agent talking over MCP are all just different windows onto that one store. Change the store → every window updates.
+**Bet 2 — The store is the single source of truth; everything else is a projection.** The structured store *is* the design-system memory. The CLI, the React viewer, the exported `design.md`/skills/CSS, and the agent talking over MCP are all just different windows onto that one store. Change the store → every window updates.
 
-**Bet 3 — Backend, not agent.** The tool is a store + MCP server + exporters + thin UI. All *creation* (building components, organisms, templates) happens in the client's Claude Code via MCP. Level 1 also allows direct manual editing of simple things (tokens, naming).
+**Bet 3 — Backend, not agent.** The toolkit is a store + CLI + MCP server + exporters + thin UI. Simple things (tokens, naming, IA, flows) are edited directly by a human via the CLI or the viewer; the harder *creation* (detailed components, organisms, templates) is authored by the connected agent (Claude Code) via MCP. The toolkit itself runs no model.
 
-> In plain words: (1) There's one program; a setting decides whether it's your master version or the client's locked copy. (2) There's one rulebook database, and everything you see or export is just a printout of it — so nothing can fall out of sync. (3) The program itself is "dumb" on purpose: it holds and serves the rules; the client's AI does the building.
+> In plain words: (1) One folder is one design system — there's no master version and no copies. (2) There's one rulebook store, and everything you see or export is just a printout of it, so nothing can fall out of sync. (3) The program itself is "dumb" on purpose: it holds, serves, and checks the rules; your AI does the building.
 
 ---
 
-## 3. The three layers
+## 3. One core, three faces
 
-### 3.1 Level 1 — Studio (the creator / super-tool)
+The design system is the **store** at the center; around it sits one core package (`@dsk/core`: the store + domain logic — validation, naming-lint, the `recommend`/`lint_usage` engine, exporters) exposed through **three faces**, each the right tool for a different job. None of the faces *is* the system — the store is; each is a window onto it.
 
-The kernel booted unlocked. Adds a multi-project dashboard on top of the client toolset:
-- **Project registry** — every client design system you manage, with its recipe version and deploy status.
-- **Onboarding** — drop a client's `design.md` files (stored as Level-3 reference pages); the user's *own* Claude Code drafts starter atoms/tokens for review (no in-tool AI).
-- **Recipe editor** — edit the blueprint that defines how a Level-2 build is configured.
-- **Deploy panel / CLI** — stamp an isolated Level-2 instance.
-- **Studio-only powers** — edit recipes, the kind whitelist, naming-convention rules, export templates; reference personal data (Section 10).
+### 3.1 The store — the design system itself
 
-Audience: you, and maybe colleagues. This is the sensitive surface (it holds *many* clients' systems), so it gets the strong auth + isolation boundary (Section 9).
+The living design-system memory, kept as a **human-readable markdown file repo** (`dsk init --files`) or SQLite. This is the source of truth from Bet 2: every token, component, pattern, guideline, screen, and flow is a page in this store (data model in §4). Because it's plain files under git, the design system gets free history, branching, and diffing, and the exports sit right beside it.
 
-> In plain words: Level 1 is your control room. You see all your clients, set up a new one from their existing notes, tune their design system, and press "deploy" to send them their own copy. You and your team use this; clients never see it.
+### 3.2 Face 1 — Builder (`dsk` CLI)
 
-### 3.2 Level 2 — Isolated tool (per client, one project): one local core, three faces
+The machine that helps you build the design system. The workhorse for *doing*: `dsk init` (scaffold a new design system; `--files` for the markdown store), `dsk token set`, `dsk component new`, `dsk pattern`, `dsk guideline`, `dsk import` (pull in existing `design.md`/brand docs), `dsk export`, `dsk feature`, `dsk recommend "..."`, `dsk lint`. Scriptable, composable, deterministic — which also makes it an excellent agent interface: a connected Claude Code can drive it from Bash. Used by both the human power-user and the agent. Authoring the hard components can also flow through MCP (§3.4).
 
-The kernel locked to a single project, delivered as **one local package** with a **local core** (the store + domain logic: validation, naming-lint, the `recommend`/`lint_usage` engine, exporters) exposed through **three faces**, each the right tool for a different job. None of the faces *is* the system — the store is; each is a window onto it.
+### 3.3 Face 2 — Viewer (`dsk serve`)
 
-- **Face 1 — `dsk` CLI (the toolkit).** The workhorse for *doing*: `dsk component new`, `dsk token set`, `dsk recommend "..."`, `dsk lint`, `dsk export tokens --tailwind`, `dsk flow new checkout`. Scriptable, composable, deterministic — which also makes it an excellent agent interface: the client's Claude Code drives it from Bash. Used by both the human power-user and the agent.
-- **Face 2 — React visualizer (`dsk serve`).** The local web app for *seeing and playing*: token gallery (visualized), component browser with usage rules, and the **IA + user-flow canvas** where the client drags screens, wires flows, arranges architecture, and sketches a new feature. Full editor for the directly-editable things (tokens, IA, flows); visualize-and-plan surface for the agent-authored ones (detailed components/organisms). Lifted from Second Brain's token gallery + `flow`/`screen` editors + feature builder.
-- **Face 3 — MCP server.** The native agent surface; mirrors the core ops as structured tools so Claude Code reads/writes the memory while building. CLI and MCP overlap on purpose — same core, two calling conventions.
+The local React app for *seeing and playing*. It boots straight into the current project — **no project picker**, because one folder is one design system. It shows: a **token gallery** (visualized), an **atomic component browser** with the full **usage/definition layer** (when/whenNot, alternatives, do/dont, a11y, per-variant guidance), the **IA + user-flow canvas** where you drag screens, wire flows, and arrange architecture, the **docs** and **assets**, and a **build-a-feature** surface for sketching a new feature against the real graph. Full editor for the directly-editable things (tokens, IA, flows); a visualize-and-plan surface for the agent-authored ones (detailed components/organisms). Lifted from the Second Brain prototype's token gallery, `flow`/`screen` editors, and feature builder.
 
-`dsk serve` hosts the React build + a small JSON API + the MCP endpoint in one process; the CLI talks to the same store directly. Knows one project; exposes fewer edit capabilities than Studio.
+### 3.4 Face 3 — Agent surface (MCP + exports)
 
-**The feature loop (the point of it):** plan in React (sketch the flow, pick screens/components) → React assembles a scoped spec from the real graph (`build_feature_prompt`) → handed to the client's Claude Code via MCP → the agent builds, reading tokens/components via `dsk`/MCP and running `lint_usage` to check its plan, writing new organisms/templates back into the store → they reappear in React for the next feature.
+The native agent surface, served **over HTTP by `dsk serve`**, so a connected Claude Code reads/writes the memory while building. An agent can consume the system **two ways**: read it *statically* from the exported bundle (§6), or drive it *live* over MCP. CLI and MCP overlap on purpose — same core, two calling conventions. The MCP tool surface (ten tools) is detailed in §5.
 
-> In plain words: Level 2 is the copy you hand the client, and it has three ways in: a command-line toolkit for *doing* things (which their AI also uses), a React app for *seeing and playing* with the whole design system and planning new features on a flow canvas, and an AI connection. They're three doors into one shared rulebook. To add a feature: sketch it in the React app, the app bundles up exactly what's needed, the client's AI builds it and files the result back — and it shows up in the app, ready for the next thing.
+**The feature loop (the point of it):** plan in the Viewer (sketch the flow, pick screens/components) → the Viewer assembles a scoped spec from the real graph (`build_feature_prompt`) → handed to the connected Claude Code via MCP → the agent builds, reading tokens/components via `dsk`/MCP and running `lint_usage` to check its plan, writing new organisms/templates back into the store → they reappear in the Viewer for the next feature.
 
-### 3.3 Level 3 — Data layer
+### 3.5 The data layer (docs) — grounding
 
-Reference material attached to a project as ordinary pages: brand guidelines, PRDs, docs, text, inspiration. Agents read these for grounding (via MCP search and via the exported bundle). No new infrastructure — they're just pages marked as read-only reference.
+Reference material attached to the design system as ordinary pages: brand guidelines, PRDs, docs, text, inspiration. Agents read these for grounding (via MCP search and via the exported bundle). No new infrastructure — they're just pages marked as read-only reference.
 
-> In plain words: Level 3 is the pile of supporting documents — brand guides, product specs — that sit next to the design system so the AI has the full context, not just the components.
+> In plain words: The design system itself is one rulebook stored as plain files. Around it are three ways in: a command-line toolkit for *doing* things (which your AI also uses), a React app for *seeing and playing* with the whole system and planning features on a flow canvas, and an AI connection that can either read an exported copy or work the live system. Plus a pile of supporting docs — brand guides, specs — so the AI has full context. To add a feature: sketch it in the app, the app bundles up exactly what's needed, your AI builds it and files the result back — and it shows up in the app, ready for the next thing.
 
 ---
 
 ## 4. The data model — the design-system memory
 
-### 4.1 The Page envelope (reused from Second Brain)
+### 4.1 The Page envelope (reused from the Second Brain prototype)
 
 Everything is a `Page`:
 ```
@@ -98,11 +91,9 @@ tags[]    filtering / grouping
 mentions[] graph edges to other pages
 meta      free-form JSON bag (the typed payload per kind)
 body      markdown
-+ project    (denormalized — which project this belongs to; indexed)
-+ visibility (personal | studio | client:<id>)
-+ origin     (recipe | client — who authored it; for safe updates)
 + schema_version
 ```
+Because one folder is one design system, there's no per-tenant `project` / `visibility` / `origin` bookkeeping — every page simply belongs to this design system. (Personal reference pointers that must stay out of exports are handled in §10.)
 
 > In plain words: Every single thing in the system — a color, a button, a rule, a screen — is stored in the same simple "card" format. A `kind` label says what type of card it is. This uniformity is what lets one set of tools handle everything.
 
@@ -120,7 +111,7 @@ Tokens follow the W3C Design Tokens (DTCG) spec: `$value`, `$type`, groups, alia
                           "primary-hover": { "$value": "{color.brand.primary}", "$type": "color" } } } }
 ```
 
-> In plain words: Colors, spacing, fonts, etc. are stored in one standard format. From that single source we automatically generate whatever the client's code needs (plain CSS, Tailwind, etc.), so the design values and the code can never disagree.
+> In plain words: Colors, spacing, fonts, etc. are stored in one standard format. From that single source we automatically generate whatever the code needs (plain CSS, Tailwind, etc.), so the design values and the code can never disagree.
 
 ### 4.4 The component-definition layer (the differentiator)
 
@@ -148,7 +139,7 @@ And a **decision/selection index** (intent → component): `"pick one of 2–5 o
 
 ### 4.5 IA & flows
 
-Reused from Second Brain: `kind: screen` (an IA node — purpose, states, UI elements as mentions) and `kind: flow` (a user-flow graph — nodes, edges with statechart annotations `trigger [condition] → outcome`, phase bands). Not pixel canvases — structure.
+Reused from the Second Brain prototype: `kind: screen` (an IA node — purpose, states, UI elements as mentions) and `kind: flow` (a user-flow graph — nodes, edges with statechart annotations `trigger [condition] → outcome`, phase bands). Not pixel canvases — structure.
 
 > In plain words: We map out the app's screens and how users move between them as a flowchart, not as detailed mockups. This tells the AI how the product is organized and what each screen is for.
 
@@ -156,168 +147,159 @@ Reused from Second Brain: `kind: screen` (an IA node — purpose, states, UI ele
 
 ## 5. The MCP surface — how humans and agents co-edit
 
-The Level-2 MCP server (local) exposes tools the client's Claude Code calls. Split by who does what:
+The MCP server (served over HTTP by `dsk serve`) exposes **ten tools** the connected Claude Code calls. Split by who does what:
 
 **Read (grounding the agent):**
 ```
-ds.search(query)                       → relevant pages
-ds.get_component(name)                 → full component card incl. usage rules
-ds.list_tokens(group?)                 → tokens (DTCG)
-ds.recommend_component(problem)        → ranked components + rationale + governing pattern
-ds.component_guidance(name)            → when_to_use / alternatives / do-dont / a11y
-ds.build_feature_prompt(intent, ...)   → a scoped prompt assembled from real graph data
-                                         (evolved from Second Brain's fbBuildPrompt)
+search(query)                        → relevant pages
+get_component(name)                  → full component card incl. usage rules
+list_tokens(group?)                  → tokens (DTCG)
+recommend_component(problem)         → ranked components + rationale + governing pattern
+component_guidance(name)             → when_to_use / alternatives / do-dont / a11y
+list_flows()                         → the IA / user-flow graph
+build_feature_prompt(intent, ...)    → a scoped prompt assembled from real graph data
+                                       (evolved from the prototype's fbBuildPrompt)
 ```
-**Write (the agent authors the hard stuff):**
+**Write (the agent authors the hard stuff, the human sets the simple stuff):**
 ```
-ds.create_component(level, name, meta) → new molecule/organism/template
-ds.update_component(name, changes)
-ds.add_pattern(...) / ds.add_guideline(...)
+set_token(name, value)               → add / update a token
+create_component(level, name, meta)  → new molecule / organism / template
 ```
 **Check (the system steers the agent):**
 ```
-ds.lint_usage(plan)  → flags violations BEFORE code is written
-                       ("Modal used for a non-blocking message — guideline says Toast")
+lint_usage(plan)  → flags violations BEFORE code is written
+                    ("Modal used for a non-blocking message — guideline says Toast")
 ```
-**Human-vs-agent split.** Tokens, naming, simple props → directly editable in the UI. Detailed components, organisms, templates → authored by the agent via the write tools. Both write paths pass through one `write_page()` chokepoint that lints naming/conventions identically.
+**Human-vs-agent split.** Tokens, naming, IA, flows → directly editable in the CLI / Viewer (`set_token` mirrors this for the agent). Detailed components, organisms, templates → authored by the agent via `create_component`. Both write paths pass through one `write_page()` chokepoint that lints naming/conventions identically.
 
-> In plain words: The client's AI talks to the rulebook through a set of commands. It can look things up ("what component fits this?"), build new things ("create this organism"), and — the clever part — get its plan checked against the rules before writing any code. Simple stuff (colors, names) the human edits by hand in the app; complicated stuff the AI builds. Either way, every change is checked the same way.
+> In plain words: Your AI talks to the rulebook through a set of commands. It can look things up ("what component fits this?"), build new things ("create this organism"), and — the clever part — get its plan checked against the rules before writing any code. Simple stuff (colors, names, screens, flows) the human edits by hand; complicated stuff the AI builds. Either way, every change is checked the same way.
 
 ---
 
 ## 6. The export / projection pipeline
 
 The store is truth; exports are regenerated views, never hand-edited:
-- **Tokens** → `tokens.dtcg.json` → CSS custom properties / Tailwind config / Style Dictionary (build only the format the client uses first).
-- **Memory** → `design.md` + `CLAUDE.md` + `.claude/skills/*` + `agents.md`.
+- **Tokens** → `tokens.dtcg.json` → `tokens.css` (CSS custom properties) / Tailwind config / Style Dictionary (build only the format used first).
+- **Memory** → `design.md` + `AGENTS.md` + `.claude/skills/design-system/SKILL.md` + `.mcp.json`.
 
-What makes the exported `design.md` *better* than a hand-written one: it carries machine-usable decision rules, anti-patterns, and the selection index — not just a component inventory. Regeneration is triggered on save (write-through), so exports never drift. Round-trip: DTCG re-imports losslessly.
+This exported bundle is exactly what lets an agent consume the system *statically*: `design.md` (the human/agent-readable rulebook), `AGENTS.md`, `tokens.css`, the Claude skill, and `.mcp.json` (which points a connecting agent at the live MCP server). What makes the exported `design.md` *better* than a hand-written one: it carries machine-usable decision rules, anti-patterns, and the selection index — not just a component inventory. Regeneration is triggered on save (write-through), so exports never drift. Round-trip: DTCG re-imports losslessly.
 
-> In plain words: From the one rulebook we automatically produce the files a codebase actually uses — token files, an AI instructions file, reusable "skills." Because they're generated, not typed by hand, they're always current. And they're smarter than normal design docs because they include the "when to use what" rules the AI can act on.
+> In plain words: From the one rulebook we automatically produce the files a codebase actually uses — token files, an AI instructions file, reusable "skills," and the config that wires an AI up to the live system. Because they're generated, not typed by hand, they're always current. And they're smarter than normal design docs because they include the "when to use what" rules the AI can act on. An AI can either read this exported copy or connect to the live system.
 
 ---
 
-## 7. The factory & recipe system (Level 1 → Level 2)
+## 7. Starting a design system — init & import
 
-**A recipe** = a versioned, schema-validated manifest pinning what a build gets: which atoms/tokens, naming conventions, enabled features, branding, MCP tools, export targets.
+There's no factory and no deploy step — you *create* a design system in place and grow it.
 
-**Deploy pipeline (`dsk deploy <project>`):**
-1. **Provision** an isolated store for the client (separate schema, or separate DB for residency-sensitive clients).
-2. **Seed** the recipe's atoms/tokens into it, tagging each `origin: recipe` with a stable id + `recipe_version`.
-3. **Config** — generate the client's `.mcp.json` + `CLAUDE.md` + run config, locked to the new project.
-4. **Export** the starter `design.md` / skills bundle.
+- **`dsk init`** scaffolds a new, empty design system in the current folder; **`dsk init --files`** lays it out as the human-readable markdown file repo (SQLite is the alternative store).
+- **`dsk import`** pulls existing `design.md` / brand docs into the store as §3.5 reference pages, and (optionally, with your own Claude Code) drafts starter tokens + atoms from them for you to review in the Viewer.
+- From there you add usage rules, patterns, and conventions (the component-definition layer, §4.4) by hand via the CLI / Viewer, or by having the agent author them.
 
-**Updates to live clients.** Explicit and diff-based, never silent: a per-atom *merge* keyed by the stable recipe-origin id. Client-authored pages (`origin: client`) are never overwritten. Default policy = **notify** (operator triggers the migration); structural changes always pinned; token-value changes optionally auto-merge.
+There is no versioned "recipe," no provisioning of isolated copies, and no propagation to other instances — the folder *is* the design system, and "sharing it" means sharing the folder (§8).
 
-> In plain words: A "recipe" is the spec for a client's build — what colors, rules, and features they get. Deploying runs four steps: make them an empty box, fill it with the starter design system, wire up their AI to connect to it, and drop in the starter files. Later, if you improve the master recipe, clients get the update *only when you choose to push it*, and it never erases the work their AI already did.
+> In plain words: You don't stamp out copies from a factory. You run one command to create a fresh design system right where you're working, optionally point it at your old design docs to get a head start, and build it up from there. If you want to hand it to someone, you hand them the folder.
 
 ---
 
 ## 8. Packaging & delivery
 
-**Level 2 (client): a self-contained local package = one core + three faces (CLI, React viz, MCP — see §3.2).** Ship as a git repo template + Docker image. The client runs `dsk serve` (or `docker compose up`), which hosts the React visualizer + JSON API + **local MCP** (stdio or `localhost` HTTP) in one process; the `dsk` CLI talks to the same store directly. Their Claude Code auto-connects via the generated `.mcp.json`. Updates are pull-based (`git pull` / `docker pull` a pinned tag).
+**One self-contained package = the store + three faces (Builder CLI, Viewer, Agent/MCP — see §3).** Ship it as a git repo (a folder). Running `dsk serve` hosts the React viewer + a small JSON API + the **MCP-over-HTTP** endpoint in one process on `localhost`; the `dsk` CLI talks to the same store directly. A connecting Claude Code auto-wires via the generated `.mcp.json`. Updates are just `git pull` on the folder.
 
-**Store = SQLite-per-project, living in the client's repo.** The design-system store is a single SQLite file committed inside the client's product repo (Postgres stays the option only for any hosted surface). This makes deploy = copy a folder, puts the design-system memory *under git alongside the code* (free history/branching/merge), and means the exports (`design.md`, `tokens.css`, skills) sit right next to it as the human/agent-readable projection. The `pages` CRUD seam abstracts the backend, so SQLite-local vs Postgres-hosted is a swap, not a rewrite.
+**Store = a markdown file repo (or SQLite), living in the repo.** The design-system store is either the human-readable markdown file repo (`dsk init --files`) or a single SQLite file, committed inside the repo. This puts the design-system memory *under git alongside the code* (free history / branching / merge) and means the exports (`design.md`, `tokens.css`, skills, `.mcp.json`) sit right next to it as the human/agent-readable projection. The `pages` CRUD seam abstracts the backend, so file-repo vs SQLite (vs Postgres for any hosted surface) is a swap, not a rewrite.
 
-Why local-first wins: the client's design system never leaves their machine (residency ✓), tenant isolation is *free* (it's their box — no shared-server leak surface), you host nothing, and "send it to your client" literally means handing over a repo/image. A local MCP isn't internet-exposed, so the auth surface mostly disappears.
+Why local-first wins: the design system is just files on your machine (residency ✓), there's nothing to host, and "share it" literally means handing over a folder. A local MCP on `localhost` isn't internet-exposed, so the auth surface mostly disappears.
 
-**Level 1 (studio):** run private/local, or host small behind real auth (Cloudflare Access / Tailscale, or an OAuth MCP gateway pattern). This is the multi-project, sensitive surface.
+**HuggingFace / hosted Spaces:** public demo only — not how the toolkit is normally used.
 
-**HuggingFace / hosted Spaces:** public demo only — not how clients receive the tool.
+**Rejected:** adopting OpenClaw or Hermes as platforms — they bundle an AI agent we explicitly don't want. (Their MCP-auth/gateway patterns are worth borrowing only if a hosted surface is ever added.)
 
-**Rejected:** adopting OpenClaw or Hermes as platforms — they bundle an AI agent we explicitly don't want. (Their MCP-auth/gateway patterns are worth borrowing only if Level 1 is ever public.)
-
-> In plain words: The client gets the tool as a package they run on their own computer — one command to start it. Their AI connects to it locally. This keeps their data on their machine, makes security simple, and costs you nothing to host. Your control room (Level 1) you keep private. We don't put client tools on a public website, and we don't build on top of other AI-assistant platforms because we don't need their AI.
+> In plain words: The design system is a folder you run on your own computer — one command to start it. Your AI connects to it locally. This keeps the data on your machine, makes security simple, and costs nothing to host. Sharing it is just handing over the folder (or `git pull`). We don't put it on a public website except for demos, and we don't build on top of other AI-assistant platforms because we don't need their AI.
 
 ---
 
-## 9. Security & isolation
+## 9. Security
 
-**The #1 invariant (verified in code).** Tenant isolation must be enforced at the database query layer, **not** at `list_pages`. In the current Second Brain code, `read_page` and every by-id write (`write/update/delete_page`) query by raw id and bypass `list_pages` — so a project filter there alone would leak data by id. Enforce scope in one place: a `project_scope()` guard at the `db.client()` boundary (or on every `Page` leaving the kernel), covering read/write/delete + graph + search + MCP tools + asset URLs.
+Because the toolkit is local-first — one folder, one design system, on your own machine — most of the classic attack surface simply isn't there: there's no shared server, no multi-tenant store, and nothing to leak between projects. Two things still matter:
 
-**Acceptance test (Phase 0, blocking).** A locked instance must get 404/empty for a *known foreign id* via `get_page`, `export_page`, graph, and search — not merely hidden from listings.
+- **MCP binding.** `dsk serve` exposes MCP-over-HTTP on `localhost`; it is not internet-exposed. If a hosted surface is ever added, that `/mcp` endpoint must require a per-deployment token (today it's open by design because it's local).
+- **Personal data never enters exports.** If you reference personal Second Brain material while authoring (§10), the share/export boundary must hard-drop anything marked personal, so private notes never end up in `design.md` or a shipped folder.
 
-**MCP auth.** The current `/mcp` is unauthenticated with `CORS: *`. For local Level-2 this is mostly moot (not internet-exposed). For any hosted surface (Level 1, or hosted Level 2), `/mcp` must require a per-deployment token.
-
-**Visibility tiers.** Every page carries `visibility` (`personal | studio | client:<id>`), enforced at the *same* scope chokepoint. The share/export boundary hard-drops anything `personal`.
-
-> In plain words: The most important thing to get right: when a client's copy is locked to one project, it must be *impossible* for it to reach another project's data — even by guessing an ID. We enforce that in one central place and prove it with a test before building anything else. For client copies running locally this is easy; for anything we host, the AI connection needs a password. And a "who can see this" label on every item keeps private things from ever leaking into shared or client files.
+> In plain words: Running everything as files on your own computer removes most of the security worry — there's no shared server and no other tenants' data to reach. The two things to keep honest: don't expose the local AI connection to the internet without a password, and make sure any private notes you reference while building never get baked into the files you share.
 
 ---
 
 ## 10. Personal data bridge (Second Brain ↔ Design-systems)
 
-Requirement: reference your personal Second Brain docs/inspiration into *your* projects (Level 1), but **never** leak personal data to colleagues (Level 1 shared) or clients (Level 2).
+Requirement: reference your personal Second Brain docs/inspiration while authoring a design system, but **never** leak personal data into the shipped design system (its exports or the folder you share).
 
-**Don't merge the databases.** Keep Second Brain its own private store; Design-systems its own. Bridge with two mechanisms:
-1. **Reference (pointer, personal-only)** — link a Second Brain page into an L1 project view; resolved only in *your* session; **stripped from every shared/exported artifact**. Zero duplication, zero leak.
-2. **Promote-to-project (explicit copy)** — deliberately copy one chosen item's content into the project store, tagged `studio` or `client:<id>`, when it should become part of the deliverable.
+**Don't merge the stores.** Keep Second Brain its own private store; the design system its own. Bridge with two mechanisms:
+1. **Reference (pointer, personal-only)** — link a Second Brain page into the design system's view; resolved only in *your* session; **stripped from every exported artifact and the shared folder**. Zero duplication, zero leak.
+2. **Promote-to-store (explicit copy)** — deliberately copy one chosen item's content into the design-system store when it should become part of the deliverable.
 
-Both stores can live in one Supabase org as separate schemas; the bridge is an MCP tool (`reference_personal_page`) available only in your personal session. Same scope guard enforces `project` *and* `visibility`.
+The bridge is an MCP tool (`reference_personal_page`) available only in your personal session; the export boundary (§9) enforces that referenced-but-not-promoted pages never ship.
 
-Rule to hold onto: **personal data is referenced, never absorbed; only an explicit promotion makes something shareable.**
+Rule to hold onto: **personal data is referenced, never absorbed; only an explicit promotion makes something part of the design system.**
 
-> In plain words: You keep a private collection of notes and inspiration (your Second Brain). You can *point to* those from a client project for your own eyes, but those pointers vanish from anything you share or hand off. If you actually want a piece of inspiration to become part of a client's design system, you consciously copy that one thing in. Private stays private unless you deliberately move it.
+> In plain words: You keep a private collection of notes and inspiration (your Second Brain). You can *point to* those while building a design system for your own eyes, but those pointers vanish from anything you export or hand off. If you actually want a piece of inspiration to become part of the design system, you consciously copy that one thing in. Private stays private unless you deliberately move it.
 
 ---
 
 ## 11. End-to-end workflows
 
-**A) Onboard a new client (you, in Level 1).**
-1. Create the project; drop their existing `design.md` / brand files as Level-3 pages.
-2. Your own Claude Code drafts starter tokens + atoms from those docs; you review/edit in the UI.
-3. Add usage rules, patterns, and conventions (the component-definition layer).
-4. `dsk deploy <project>` → isolated Level-2 package + generated AI config + exported bundle.
+**A) Start a design system.**
+1. `dsk init --files` in a folder; optionally `dsk import` your existing `design.md` / brand files as §3.5 reference pages.
+2. Your own Claude Code can draft starter tokens + atoms from those docs; you review/edit in the Viewer.
+3. Add usage rules, patterns, and conventions (the component-definition layer) by hand or via the agent.
 
-**B) Client builds a feature (client, in their Claude Code).**
-1. Client asks their Claude Code to build, say, a settings page.
-2. The agent calls `ds.recommend_component` / `ds.component_guidance` / `ds.build_feature_prompt` to ground itself in the real design system.
-3. It proposes a plan; `ds.lint_usage` checks it against the rules; the agent writes code using the exported tokens/components.
-4. New organisms/templates it authors are saved back into the memory via the write tools.
+**B) Build a feature (the loop).**
+1. In the Viewer, sketch the feature — pick screens/components on the flow canvas; `build_feature_prompt` assembles a scoped spec from the real graph.
+2. Your Claude Code grounds itself with `recommend_component` / `component_guidance` and proposes a plan.
+3. `lint_usage` checks the plan against the rules *before* code is written; the agent builds using the exported tokens/components.
+4. New organisms/templates it authors are saved back into the store via `create_component` — and reappear in the Viewer for the next feature.
 
-**C) Push a design update (you → live clients).**
-1. You bump a token or rule in the recipe.
-2. Clients are *notified*; you trigger an explicit, diff-based merge.
-3. Recipe-origin items update; client-authored work is untouched.
+**C) Hand the design system to an agent.**
+1. `dsk export` regenerates the bundle (`design.md`, `AGENTS.md`, `tokens.css`, the Claude skill, `.mcp.json`).
+2. An agent either reads the bundle statically, or connects live over MCP via `.mcp.json` and drives the system.
 
-> In plain words: (A) You set a client up from their old files and ship them a copy. (B) The client tells their AI to build something; the AI checks the rulebook, gets its plan approved, builds it, and files what it made back into the rulebook. (C) When you improve the master design, you push it to clients on purpose, and it never wipes out what they've already built.
+> In plain words: (A) You create a design system, optionally from your old files, and build it up. (B) You tell your AI to build something; it sketches on the canvas, checks the rulebook, gets its plan approved, builds it, and files what it made back into the rulebook. (C) When you want an AI to use the system, you either hand it the exported files or point it at the live connection.
 
 ---
 
-## 12. Build roadmap (lean, first-client-first)
+## 12. Build roadmap (lean, first-system-first)
 
 | Phase | Goal | Proves |
 |---|---|---|
-| **0 — Kernel + isolation (wk 1)** | Fork Second Brain → kernel; trim kinds; add `DSK_ROLE`/`PROJECT_LOCK`; enforce the db-layer scope guard; write the red-team test; add `0001_pages.sql` | A locked copy can never see another project's data, by any path |
-| **1 — Tokens + exporters (wk 2)** | DTCG token model; the one exporter the first client uses; `design.md` + skills regen on save | Edit a token → exported files change in lockstep (no drift) |
-| **2 — Factory + first client (wk 3–4)** | `dsk deploy` CLI; local MCP package; component-definition layer + `recommend`/`lint_usage` tools | Client's own Claude Code builds a component honoring the tokens |
-| **3 — Studio + onboarding (wk 5–7)** | L1 multi-project dashboard; doc→atoms drafting; `pattern`/`guideline` kinds + graph; one-component-per-page | A new client onboarded from the UI without touching the DB |
-| **4 — Propagation + hardening (wk 8+)** | recipe_lock + versioning; diff-based per-atom merge; revisions/history; auth/RBAC/audit as needed | Push a token update to clients without clobbering their work |
+| **0 — Core + store (wk 1)** | Lift the Second Brain prototype → `@dsk/core`; trim kinds; the markdown file-repo store + `pages` CRUD seam; `dsk init` | One folder holds a working design-system store |
+| **1 — Tokens + exporters (wk 2)** | DTCG token model; the one exporter used first; `design.md` + `AGENTS.md` + skill + `.mcp.json` regen on save | Edit a token → exported files change in lockstep (no drift) |
+| **2 — Definition layer + agent (wk 3–4)** | component-definition layer + `recommend`/`lint_usage`; MCP-over-HTTP via `dsk serve`; the 10-tool surface | A connected Claude Code builds a component honoring the tokens |
+| **3 — Viewer + feature loop (wk 5–7)** | React Viewer (token gallery, component browser, IA/flow canvas, build-a-feature); `pattern`/`guideline` kinds + graph | Sketch a feature in the Viewer → agent builds it → it reappears |
+| **4 — Hardening (wk 8+)** | revisions/history via git; import polish; docs/assets; optional SQLite backend | Real day-to-day authoring of a design system end-to-end |
 
-Deferred for client #1 (per review): recipe-propagation engine, the atomic-graph refactor, the 4-format token hub, the L1 studio UI (use the CLI), and the schema-migration framework.
+Deferred: the 4-format token hub (build the first-used format first), the atomic-graph impact-analysis refactor, and a Postgres/hosted backend (only if a hosted surface is ever added).
 
-> In plain words: Build in order of "what proves the idea works." First: make the locked copy provably safe. Then: prove the rulebook drives the exported files. Then: ship one real client and watch their AI build against it. Only after that do we build the fancy dashboard and the update-pushing machinery — because those don't matter until you have a second client.
+> In plain words: Build in order of "what proves the idea works." First: one folder that holds the rulebook. Then: prove the rulebook drives the exported files. Then: prove an AI can build against it and get checked. Then: the React app and the full sketch-build-refile loop. Fancier bits (multi-format tokens, impact analysis, a hosted backend) wait until they're actually needed.
 
 ---
 
 ## 13. Open decisions
 
-1. ~~Does the client need the GUI at all?~~ **RESOLVED:** Level 2 is one local core with three faces — a `dsk` CLI, a React visualizer (`dsk serve`), and a local MCP server (see §3.2). CLI for doing, React for seeing/playing/planning, MCP for the agent. Store is SQLite-per-project in the client's repo (§8).
+1. ~~Does the toolkit need a GUI at all?~~ **RESOLVED:** one core with three faces — a `dsk` CLI (Builder), a React Viewer (`dsk serve`), and an MCP-over-HTTP Agent surface (§3). Store is a markdown file repo (`dsk init --files`) or SQLite in the repo (§8).
 2. **`pattern`/`guideline` as first-class kinds vs. richer `meta` on components.** First-class buys graph queries ("which components does this guideline govern") at the cost of more surface.
-3. **First export target** — React+Tailwind / plain CSS vars / Vue+Web Components / decide-at-first-client.
-4. **Isolation tier for client #1** — mostly moot now that L2 is local-first/SQLite-in-repo (isolation is the client's machine); the question only returns for a hosted L2 or for Level 1's multi-project store.
-5. **Build stack** — lift the hyperscript renderers from Second Brain, or rebuild the visualizer in React? (The CLI + React-viz direction leans toward a real React app for L2's visualizer and a framework for L1.)
+3. **First export target** — React+Tailwind / plain CSS vars / Vue+Web Components / decide-at-first-use.
+4. **Store backend for v1** — markdown file repo (great git diffs, human-readable) vs SQLite (richer queries). The `pages` seam keeps this a swap.
+5. **Build stack** — lift the hyperscript renderers from the Second Brain prototype, or rebuild the Viewer in React? (The direction leans toward a real React app for the Viewer.)
 6. **Agent via CLI vs MCP** — ship both over the shared core (recommended), or pick one? Some teams prefer giving the agent a great CLI over MCP tools; both are cheap once the core exists.
 
-> In plain words: A handful of forks we should settle as we go: how formal the "rules" storage is; which code format we export first; how strongly isolated the first client is; what we build the screens with; and whether the AI works through the command-line, the structured connection, or both. (The big one — "does the client get a screen?" — is settled: yes, a React app, plus a command-line toolkit, plus the AI connection.)
+> In plain words: A handful of forks we should settle as we go: how formal the "rules" storage is; which code format we export first; whether the store is plain files or SQLite to start; what we build the screens with; and whether the AI works through the command-line, the structured connection, or both. (The big one — "does it get a screen?" — is settled: yes, a React app, plus a command-line toolkit, plus the AI connection.)
 
 ---
 
 ## 14. Top risks
 
-1. **Isolation leak** — the entire enterprise promise rests on the scope guard. Mitigate: one chokepoint, route everything through it, gate CI on the red-team test. (Phase 0.)
-2. **Update propagation** — "consistent builds" vs "fine-tuned per client" fight; silent overwrite destroys client work. Mitigate: explicit, diff-based, per-atom merge keyed by stable id; never auto-push structure.
-3. **Token-model migration** — Second Brain is mid-migration (legacy → `meta.sets[]`); we're going to DTCG. Migrate cleanly and update the prompt builder, or the agent reads stale shapes.
-4. **`app.js` scale** — 7,925-line single file, no tests. Build L1 fresh; lift only proven L2 renderers; add a smoke-test harness.
+1. **Export drift / source-of-truth erosion** — if any face lets you edit a projection instead of the store, the "one rulebook" promise breaks. Mitigate: every write goes through the `write_page()` chokepoint; exports are regenerated on save, never hand-edited.
+2. **Token-model migration** — the Second Brain prototype is mid-migration (legacy → `meta.sets[]`); we're going to DTCG. Migrate cleanly and update the prompt builder, or the agent reads stale shapes.
+3. **A thin definition layer** — if components ship without real when/whenNot/alternatives/do-dont, the system degrades to a parts list and the agent is back to guessing. Mitigate: make the definition layer the thing `lint_usage` and `recommend` depend on, so it's load-bearing, not optional.
+4. **Prototype code scale** — the Second Brain `app.js` is a 7,925-line single file, no tests. Build the Viewer fresh; lift only proven renderers; add a smoke-test harness.
 
-> In plain words: The things most likely to bite: a security hole that lets one client see another's data; an update that accidentally erases a client's work; a messy half-finished data format; and an old giant code file that's hard to grow. We have a specific plan for each.
+> In plain words: The things most likely to bite: someone editing a printout instead of the real rulebook so they fall out of sync; a messy half-finished token format; a "design system" that's really just a parts list because nobody filled in the usage rules; and an old giant code file that's hard to grow. We have a specific plan for each.
