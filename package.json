@@ -1,0 +1,23 @@
+{
+  "name": "dsk-monorepo",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Design-system memory toolkit (working name: dsk)",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dsk": "tsx packages/cli/src/index.ts",
+    "serve": "tsx packages/server/src/index.ts",
+    "build:web": "npm run build -w @dsk/web",
+    "typecheck": "tsc --noEmit -p packages/core/tsconfig.json && tsc --noEmit -p packages/cli/tsconfig.json && tsc --noEmit -p packages/mcp/tsconfig.json && tsc --noEmit -p packages/server/tsconfig.json && tsc --noEmit -p packages/web/tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@dsk/cli",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "The dsk command — a face over @dsk/core.",
+  "bin": {
+    "dsk": "bin/dsk.mjs"
+  },
+  "dependencies": {
+    "@dsk/core": "*",
+    "@dsk/server": "*",
+    "commander": "^12.1.0"
+  }
+}

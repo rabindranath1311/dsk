@@ -1,0 +1,17 @@
+{
+  "name": "@dsk/server",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Local server: the React visualizer + JSON API over the design-system store.",
+  "main": "./src/server.ts",
+  "exports": {
+    ".": "./src/server.ts"
+  },
+  "dependencies": {
+    "@dsk/core": "*",
+    "@dsk/mcp": "*",
+    "@hono/node-server": "^1.13.7",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "hono": "^4.6.14"
+  }
+}

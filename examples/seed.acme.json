@@ -1,0 +1,126 @@
+{
+  "tokens": {
+    "color.brand.primary": "#1F6FEB",
+    "color.brand.primary-hover": "{color.brand.primary}",
+    "color.danger": "#C2410C",
+    "color.text": "#1A1A18",
+    "space.sm": "8px",
+    "space.md": "16px",
+    "radius.md": "6px",
+    "font.body": { "value": "system-ui, sans-serif", "type": "fontFamily" }
+  },
+  "components": [
+    {
+      "name": "Button",
+      "level": "atom",
+      "intents": ["submit-form", "primary-action", "confirm"],
+      "tokensUsed": ["color.brand.primary", "color.brand.primary-hover", "radius.md", "space.md"],
+      "variants": [
+        { "name": "primary", "when": "the single main action in a region" },
+        { "name": "danger", "when": "irreversible/destructive actions, always with a confirm step" }
+      ],
+      "usage": {
+        "when": "Commit an action on the current view (submit, confirm, save).",
+        "whenNot": "Navigation between pages — use Link. Destructive actions without confirmation — pair with ConfirmDialog.",
+        "alternatives": [
+          { "use": "Link", "when": "navigating rather than committing an action" },
+          { "use": "IconButton", "when": "space-constrained toolbars" }
+        ],
+        "pairsWith": ["Toast", "ConfirmDialog"],
+        "do": ["One primary button per region", "Use a verb-first label (\"Save changes\")"],
+        "dont": ["\"Click here\" labels", "Two primary buttons competing in one region"],
+        "a11y": "Minimum 44px touch target; never indicate state with color alone."
+      }
+    },
+    {
+      "name": "Link",
+      "level": "atom",
+      "intents": ["navigate", "go-to-page"],
+      "tokensUsed": ["color.brand.primary"],
+      "usage": {
+        "when": "Navigate to another page or view.",
+        "whenNot": "Committing an action on the current view — use Button.",
+        "alternatives": [{ "use": "Button", "when": "the click performs an action rather than navigation" }],
+        "a11y": "Use descriptive link text; avoid \"here\"."
+      }
+    },
+    {
+      "name": "Toast",
+      "level": "molecule",
+      "intents": ["notify", "non-blocking-message", "confirmation-feedback"],
+      "usage": {
+        "when": "Show a brief, non-blocking confirmation or status message.",
+        "whenNot": "Anything that needs a decision or blocks the user — use ConfirmDialog.",
+        "alternatives": [{ "use": "ConfirmDialog", "when": "the user must make a blocking choice" }],
+        "do": ["Auto-dismiss after a few seconds", "Keep to one line"],
+        "dont": ["Put a required action only inside a toast"]
+      }
+    },
+    {
+      "name": "ConfirmDialog",
+      "level": "organism",
+      "intents": ["confirm-destructive", "blocking-decision"],
+      "tokensUsed": ["color.danger", "space.md", "radius.md"],
+      "usage": {
+        "when": "Block the user to confirm a destructive or irreversible action.",
+        "whenNot": "Non-blocking feedback — use Toast.",
+        "do": ["Name the consequence in the confirm button (\"Delete 3 files\")"],
+        "dont": ["Generic \"Are you sure?\" without naming the consequence"]
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "name": "Destructive confirmation",
+      "problem": "A user triggers an irreversible action (delete, remove, reset).",
+      "solution": "A danger-variant Button that opens a ConfirmDialog naming the exact consequence.",
+      "componentsUsed": ["Button", "ConfirmDialog"],
+      "rationale": "Irreversible actions must be blocking and must state the consequence, not just \"Are you sure?\"."
+    }
+  ],
+  "guidelines": [
+    {
+      "name": "One primary action per region",
+      "rule": "Each view region has at most one primary Button; everything else is secondary or tertiary.",
+      "scope": "hierarchy",
+      "governs": ["Button"]
+    },
+    {
+      "name": "Non-blocking messages use Toast",
+      "rule": "Status and success feedback that needs no decision uses Toast, never a Modal or ConfirmDialog.",
+      "scope": "feedback",
+      "governs": ["Toast", "ConfirmDialog"]
+    }
+  ],
+  "screens": [
+    {
+      "name": "Settings",
+      "purpose": "Account settings; entry point for destructive account actions.",
+      "states": ["default", "saving", "error"],
+      "uiElements": ["section list", "Delete account button"],
+      "components": ["Button", "Link"]
+    },
+    {
+      "name": "Delete account dialog",
+      "purpose": "Block the user to confirm permanent account deletion.",
+      "states": ["idle", "deleting"],
+      "components": ["ConfirmDialog", "Button"]
+    }
+  ],
+  "flows": [
+    {
+      "name": "Delete account",
+      "sections": ["Settings", "Confirm"],
+      "nodes": [
+        { "id": "n1", "title": "Settings", "type": "screen", "screen": "Settings" },
+        { "id": "n2", "title": "Confirm dialog", "type": "screen", "screen": "Delete account dialog" },
+        { "id": "n3", "title": "Account deleted", "type": "end" }
+      ],
+      "edges": [
+        { "from": "n1", "to": "n2", "trigger": "tap", "label": "Delete account" },
+        { "from": "n2", "to": "n3", "trigger": "tap", "condition": "confirmed", "label": "Delete" },
+        { "from": "n2", "to": "n1", "trigger": "tap", "condition": "cancelled", "label": "Cancel" }
+      ]
+    }
+  ]
+}

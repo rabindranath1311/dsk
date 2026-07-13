@@ -1,0 +1,15 @@
+{
+  "name": "@dsk/mcp",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Local MCP server exposing the design-system memory to an agent (Claude Code).",
+  "main": "./src/server.ts",
+  "exports": {
+    ".": "./src/server.ts"
+  },
+  "dependencies": {
+    "@dsk/core": "*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  }
+}

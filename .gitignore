@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+
+# sqlite sidecar files (the store.db itself is meant to be committed)
+*.db-wal
+*.db-shm

@@ -1,0 +1,17 @@
+{
+  "name": "@dsk/core",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "The design-system kernel: store, model, and exporters. The single source of truth.",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12"
+  }
+}

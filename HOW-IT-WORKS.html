@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design system platform — how it works</title>
+<style>
+:root{
+--font-serif:ui-serif,Georgia,Cambria,"Times New Roman",serif;
+--font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+--font-mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+--bg:#FBFBF9;--surface:#FFFFFF;--band:#F4F4F0;
+--text:#1A1A18;--secondary:#46463F;--muted:#6B6B66;
+--hairline:#E2E2DC;--hairline-strong:#CFCFC8;
+--accent:#2F5BEA;--accent-tint:#E7ECFD;--accent-text:#1E3FB0;
+--warn:#C2410C;--warn-tint:#FBEBE2;
+--shadow:0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){
+:root{
+--bg:#0E0F12;--surface:#16181D;--band:#16181D;
+--text:#ECECE6;--secondary:#C3C3BC;--muted:#9A9A92;
+--hairline:#2A2C32;--hairline-strong:#3A3D45;
+--accent:#7C9CFF;--accent-tint:#1B2440;--accent-text:#A9BEFF;
+--warn:#F08A5C;--warn-tint:#2A1B14;
+--shadow:none;
+}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+margin:0;background:var(--bg);color:var(--text);
+font-family:var(--font-sans);font-size:17px;line-height:1.6;
+-webkit-font-smoothing:antialiased;
+}
+main{max-width:820px;margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+p{color:var(--secondary);margin:0 0 1em}
+.body p{color:var(--secondary)}
+h1,h2,h3{margin:0}
+a{color:var(--accent-text)}
+
+/* mono helpers */
+.kicker{font-family:var(--font-mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent-text);margin:0 0 1rem}
+.breadcrumb{font-family:var(--font-mono);font-size:.8125rem;color:var(--muted);letter-spacing:.02em;margin:0 0 1.75rem}
+.caption{font-family:var(--font-mono);font-size:.8125rem;color:var(--muted);letter-spacing:.02em;margin:.85rem 0 0}
+.mono{font-family:var(--font-mono)}
+
+/* masthead */
+.masthead{padding:clamp(48px,12vh,96px) 0 clamp(40px,8vh,72px)}
+h1{font-family:var(--font-serif);font-weight:500;font-size:clamp(2rem,5vw + 1rem,3.4rem);line-height:1.08;letter-spacing:-.015em;color:var(--text);margin:0 0 1.1rem;max-width:16ch}
+.standfirst{font-size:1.25rem;font-weight:400;line-height:1.5;color:var(--secondary);max-width:46ch;margin:0 0 1.8rem}
+.accent-rule{height:2px;width:80px;background:var(--accent);border:0;margin:0}
+
+/* sections */
+section{padding-top:clamp(56px,9vw,88px);margin-top:clamp(56px,9vw,88px);border-top:1px solid var(--hairline);position:relative}
+.sec-head{margin-bottom:1.6rem}
+.numeral{font-family:var(--font-mono);font-size:clamp(2rem,4vw,3rem);font-weight:400;color:var(--hairline-strong);line-height:1;display:block;margin-bottom:.3rem}
+h2{font-family:var(--font-serif);font-weight:500;font-size:clamp(1.5rem,3vw + .5rem,2.1rem);line-height:1.15;color:var(--text);letter-spacing:-.01em}
+.body{max-width:62ch}
+@media(min-width:720px){
+section{padding-left:84px}
+.numeral{position:absolute;left:0;top:clamp(56px,9vw,88px);margin:0}
+.sec-head .kicker{margin-bottom:.4rem}
+}
+
+/* problem two-col */
+.two-col{display:grid;grid-template-columns:1fr;gap:1.5rem;align-items:start}
+@media(min-width:680px){.two-col{grid-template-columns:60% 1fr;gap:2.5rem}}
+.glyph-wrap{display:flex;justify-content:center}
+.glyph-sm{max-width:280px;width:100%}
+
+/* idea centered */
+.statement{font-family:var(--font-serif);font-weight:500;font-size:clamp(1.35rem,2.4vw + .6rem,1.7rem);line-height:1.3;color:var(--text);text-align:center;max-width:24ch;margin:0 auto 1.4rem;letter-spacing:-.01em}
+.center-body{text-align:center;max-width:54ch;margin:0 auto}
+.conv-wrap{display:flex;justify-content:center;margin-top:2rem}
+.conv-wrap svg{max-width:300px;width:100%}
+
+/* full bleed band */
+.fullbleed{position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;width:100vw;background:var(--band);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:clamp(28px,5vw,48px) clamp(20px,5vw,40px)}
+.fullbleed .inner{max-width:960px;margin:0 auto}
+.hero-frame{border:1px solid var(--hairline-strong);border-radius:10px;background:var(--surface);padding:clamp(10px,2vw,18px)}
+.legend{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);letter-spacing:.02em;margin:.6rem 0 0;text-align:center}
+
+/* three parts rows */
+.rows{margin-top:.5rem}
+.row{display:grid;grid-template-columns:auto 1fr;gap:1rem 1.25rem;padding:1.6rem 0;border-top:1px solid var(--hairline);align-items:start}
+.row:first-child{border-top:0}
+.row .rnum{font-family:var(--font-mono);font-size:1.75rem;font-weight:400;color:var(--accent-text);line-height:1;min-width:1.6ch}
+.row .rbody{}
+.row h3{font-family:var(--font-serif);font-weight:500;font-size:1.125rem;color:var(--text);margin:0 0 .35rem;display:flex;align-items:center;gap:.5rem}
+.row p{margin:0;font-size:1rem}
+.tick{flex:0 0 auto}
+
+/* lead line */
+.lead{font-size:1.0625rem;color:var(--text);font-weight:500;max-width:48ch;margin:0 0 1.5rem}
+
+/* svg blocks */
+.svg-block{margin:1.5rem 0}
+.svg-block svg{display:block;width:100%;height:auto}
+
+/* cards grid */
+.grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:1.6rem}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:1.1rem 1.15rem;box-shadow:var(--shadow)}
+.card h3{font-family:var(--font-serif);font-weight:500;font-size:1.0625rem;color:var(--text);margin:0 0 .5rem}
+.card p{font-size:.95rem;margin:0;color:var(--secondary)}
+
+/* pull quote */
+.pull{font-family:var(--font-serif);font-style:italic;font-size:1.25rem;line-height:1.4;color:var(--text);border-left:3px solid var(--accent);padding:.2rem 0 .2rem 1.1rem;margin:2rem 0 0;max-width:40ch}
+
+/* MCP verb list */
+.verbs{margin:1.6rem 0;display:grid;gap:1rem}
+.verb{display:grid;grid-template-columns:auto 1fr;gap:.4rem 1rem;align-items:baseline}
+.verb .vt{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:var(--accent-text);background:var(--accent-tint);padding:.3rem .55rem;border-radius:6px;white-space:nowrap;align-self:start}
+.verb p{margin:0;font-size:1rem;color:var(--secondary)}
+@media(max-width:520px){.verb{grid-template-columns:1fr}.verb .vt{justify-self:start}}
+
+/* lint card */
+.lint{background:var(--surface);border:1px solid var(--hairline);border-radius:10px;padding:1rem 1.15rem;margin:1.6rem 0;box-shadow:var(--shadow)}
+.lint-row{display:flex;align-items:center;gap:.65rem;font-family:var(--font-mono);font-size:.85rem;padding:.3rem 0}
+.lint-row.ok{color:var(--accent-text)}
+.lint-row.bad{color:var(--warn)}
+.lint-row svg{flex:0 0 auto}
+.note{font-family:var(--font-mono);font-size:.8125rem;color:var(--muted);line-height:1.55;letter-spacing:.01em;margin:1.2rem 0 0;max-width:64ch}
+
+/* numbered practice */
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:1.5rem 0 0}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 1.1rem 2.6rem;color:var(--secondary);font-size:1rem;line-height:1.55}
+ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:0;font-family:var(--font-mono);font-size:.85rem;color:var(--accent-text);font-weight:500}
+.loop-wrap{display:flex;justify-content:center;margin-top:1.5rem}
+.loop-wrap svg{max-width:340px;width:100%}
+
+/* going further inset */
+.inset{border:1px solid var(--hairline);border-left:3px solid var(--accent);border-radius:8px;background:var(--surface);padding:1rem 1.15rem;margin:1.5rem 0 0}
+.inset p{margin:0;font-size:.95rem;color:var(--secondary)}
+.inset .t{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 .4rem}
+
+/* why rows */
+.why .row h3{font-size:1.125rem}
+.why .row p{color:var(--secondary)}
+
+/* footer */
+footer{margin-top:clamp(56px,9vw,88px);padding:clamp(40px,7vw,64px) 0 clamp(48px,8vw,72px)}
+footer .accent-rule{margin-bottom:1.4rem}
+.foot-sum{font-family:var(--font-mono);font-size:.875rem;line-height:1.6;color:var(--secondary);letter-spacing:.01em;max-width:62ch;margin:0 0 1.4rem}
+.credit{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <main style="padding-top:0;padding-bottom:0">
+    <p class="breadcrumb">studio &rarr; client tool &rarr; ai &rarr; codebase</p>
+    <p class="kicker">Design system platform / how it works</p>
+    <h1>How the system works.</h1>
+    <p class="standfirst">The design system lives as one shared memory. Here is how the studio, the client tool, the AI, and the codebase fit together.</p>
+    <hr class="accent-rule">
+  </main>
+</header>
+
+<main>
+
+  <!-- 02 IDEA -->
+  <section id="s02" aria-labelledby="h02">
+    <div class="sec-head" style="text-align:center">
+      <span class="numeral" style="position:static;display:inline-block;margin:0 0 .3rem">01</span>
+      <p class="kicker">The model: one shared memory</p>
+      <h2 id="h02" class="visually-h2" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">The model: one shared memory</h2>
+    </div>
+    <p class="statement">The design system is stored as one shared memory — a single place where every color, component, rule, screen, and flow lives.</p>
+    <div class="center-body">
+      <p>Both the designer and the AI read from <em>and</em> write back to this memory while building, so everyone works from one source of truth.</p>
+    </div>
+    <div class="conv-wrap">
+      <svg viewBox="0 0 280 160" role="img" aria-labelledby="g02t g02d" preserveAspectRatio="xMidYMid meet">
+        <title id="g02t">Convergence onto shared memory</title>
+        <desc id="g02d">A person on the left and an AI on the right each point an arrow into a central shared-memory disc.</desc>
+        <defs>
+          <marker id="arrow" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--accent)"/></marker>
+          <marker id="arrow-ink" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--hairline-strong)"/></marker>
+        </defs>
+        <!-- person -->
+        <g style="stroke:var(--hairline-strong);stroke-width:1.25;fill:none">
+          <circle cx="34" cy="58" r="9"/>
+          <path d="M20 86 q14 -16 28 0"/>
+        </g>
+        <text x="34" y="106" style="fill:var(--muted);font-family:var(--font-mono);font-size:9px" text-anchor="middle">designer</text>
+        <!-- ai -->
+        <g style="stroke:var(--hairline-strong);stroke-width:1.25;fill:none">
+          <rect x="232" y="48" width="24" height="22" rx="5"/>
+          <circle cx="239" cy="59" r="2" style="fill:var(--hairline-strong)"/>
+          <circle cx="249" cy="59" r="2" style="fill:var(--hairline-strong)"/>
+          <path d="M244 48 v-7"/><circle cx="244" cy="39" r="2" style="fill:var(--hairline-strong)"/>
+        </g>
+        <text x="244" y="106" style="fill:var(--muted);font-family:var(--font-mono);font-size:9px" text-anchor="middle">ai</text>
+        <!-- disc -->
+        <circle cx="140" cy="64" r="34" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:2"/>
+        <text x="140" y="61" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9.5px;letter-spacing:.02em" text-anchor="middle">shared</text>
+        <text x="140" y="73" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9.5px;letter-spacing:.02em" text-anchor="middle">memory</text>
+        <!-- arrows in -->
+        <path d="M50 64 H100" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#arrow)"/>
+        <path d="M228 64 H182" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#arrow)"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 03 CENTERPIECE -->
+  <section id="s03" aria-labelledby="h03">
+    <div class="sec-head">
+      <span class="numeral">02</span>
+      <p class="kicker">The centerpiece</p>
+      <h2 id="h03">The end-to-end flow.</h2>
+    </div>
+  </section>
+  <div class="fullbleed">
+    <div class="inner">
+      <div class="hero-frame">
+        <svg viewBox="0 0 960 420" role="img" aria-labelledby="g03t g03d" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto">
+          <title id="g03t">End-to-end flow from studio to codebase</title>
+          <desc id="g03d">The studio deploys an isolated copy onto the client's machine. Inside, a visual app, a command-line toolkit and an AI connection all sit over one shared-memory store of tokens, components with rules, icons and assets, and screens and flows. The client's AI reads and writes that memory and exports ready-to-use design files into the codebase. Data never leaves the client's machine.</desc>
+          <defs>
+            <marker id="ah" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--accent)"/></marker>
+          </defs>
+
+          <!-- residency outline -->
+          <rect x="234" y="20" width="710" height="384" rx="14" style="fill:none;stroke:var(--hairline-strong);stroke-width:1.25" stroke-dasharray="2 5" opacity="0.8"/>
+          <text x="248" y="396" style="fill:var(--muted);font-family:var(--font-mono);font-size:10px;letter-spacing:.03em">on the client's machine — data never leaves</text>
+
+          <!-- A: Studio -->
+          <rect x="18" y="86" width="156" height="220" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+          <text x="34" y="116" style="fill:var(--text);font-family:var(--font-sans);font-size:14px;font-weight:600">Your Studio</text>
+          <text x="34" y="134" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9.5px;letter-spacing:.03em">LEVEL 1 · OUR SIDE</text>
+          <rect x="34" y="150" width="124" height="26" rx="5" style="fill:none;stroke:var(--hairline);stroke-width:1.25"/>
+          <text x="44" y="167" style="fill:var(--secondary);font-family:var(--font-mono);font-size:10px">design system</text>
+          <rect x="34" y="184" width="124" height="26" rx="5" style="fill:none;stroke:var(--hairline);stroke-width:1.25"/>
+          <text x="44" y="201" style="fill:var(--secondary);font-family:var(--font-mono);font-size:10px">recipe</text>
+          <text x="34" y="240" style="fill:var(--muted);font-family:var(--font-sans);font-size:11px">author + fine-tune</text>
+
+          <!-- dashed boundary -->
+          <line x1="234" y1="20" x2="234" y2="404" style="stroke:var(--hairline-strong);stroke-width:1.25" stroke-dasharray="3 5"/>
+          <text x="240" y="40" style="fill:var(--muted);font-family:var(--font-mono);font-size:9.5px">client's machine &rarr;</text>
+
+          <!-- Arrow 1 deploy -->
+          <path d="M174 176 H300" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <!-- stamp glyph -->
+          <g transform="translate(196,148)">
+            <rect x="4" y="4" width="16" height="20" rx="3" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
+            <rect x="0" y="0" width="16" height="20" rx="3" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.5"/>
+          </g>
+          <rect x="186" y="184" width="116" height="20" rx="6" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1"/>
+          <text x="244" y="198" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px" text-anchor="middle">deploy — isolated copy</text>
+
+          <!-- B: client container -->
+          <rect x="306" y="62" width="404" height="300" rx="12" style="fill:none;stroke:var(--hairline-strong);stroke-width:1.5" stroke-dasharray="2 4"/>
+          <text x="322" y="84" style="fill:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:600">Client's machine</text>
+          <text x="322" y="100" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px;letter-spacing:.02em">LEVEL 2 · ONE PRODUCT · RUNS LOCALLY</text>
+
+          <!-- three tabs -->
+          <g style="font-family:var(--font-sans);font-size:11px">
+            <rect x="322" y="112" width="118" height="30" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+            <text x="381" y="131" style="fill:var(--secondary)" text-anchor="middle">Visual app</text>
+            <rect x="448" y="112" width="118" height="30" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+            <text x="507" y="127" style="fill:var(--secondary)" text-anchor="middle">Toolkit</text>
+            <text x="507" y="138" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">CLI</text>
+            <rect x="574" y="112" width="120" height="30" rx="6" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+            <text x="634" y="127" style="fill:var(--secondary)" text-anchor="middle">AI connection</text>
+            <text x="634" y="138" style="fill:var(--muted);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">MCP</text>
+          </g>
+          <!-- down arrows -->
+          <path d="M381 142 V172" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <path d="M507 142 V172" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <path d="M634 142 V172" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+
+          <!-- slab -->
+          <rect x="322" y="178" width="372" height="92" rx="8" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1.5"/>
+          <rect x="322" y="178" width="3" height="92" style="fill:var(--accent)"/>
+          <text x="334" y="198" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:10px;letter-spacing:.03em">SHARED MEMORY · source of truth</text>
+          <g style="font-family:var(--font-mono);font-size:9.5px">
+            <line x1="416" y1="208" x2="416" y2="260" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
+            <line x1="508" y1="208" x2="508" y2="260" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
+            <line x1="600" y1="208" x2="600" y2="260" style="stroke:var(--accent);stroke-width:1" opacity="0.4"/>
+            <text x="369" y="237" style="fill:var(--accent-text)" text-anchor="middle">Tokens</text>
+            <text x="462" y="231" style="fill:var(--accent-text)" text-anchor="middle">Components</text>
+            <text x="462" y="243" style="fill:var(--accent-text)" text-anchor="middle">+ rules</text>
+            <text x="554" y="231" style="fill:var(--accent-text)" text-anchor="middle">Icons &amp;</text>
+            <text x="554" y="243" style="fill:var(--accent-text)" text-anchor="middle">assets</text>
+            <text x="647" y="231" style="fill:var(--accent-text)" text-anchor="middle">Screens</text>
+            <text x="647" y="243" style="fill:var(--accent-text)" text-anchor="middle">&amp; flows</text>
+          </g>
+
+          <!-- C: AI assistant node + read/write -->
+          <rect x="322" y="292" width="200" height="56" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+          <text x="334" y="316" style="fill:var(--text);font-family:var(--font-sans);font-size:12px;font-weight:600">Client's AI assistant</text>
+          <text x="334" y="333" style="fill:var(--muted);font-family:var(--font-mono);font-size:9.5px">builds the feature</text>
+          <!-- double arrow from MCP tab down to AI -->
+          <path d="M628 270 V288 H440 V290" style="stroke:var(--accent);stroke-width:1.5;fill:none" marker-end="url(#ah)"/>
+          <path d="M452 290 V288 H640 V270" style="stroke:var(--accent);stroke-width:1.5;fill:none" marker-end="url(#ah)"/>
+          <text x="566" y="282" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px" text-anchor="middle">read</text>
+          <text x="500" y="304" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:9px" text-anchor="middle">write back</text>
+
+          <!-- D: export out -->
+          <path d="M710 234 H812" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#ah)"/>
+          <rect x="724" y="210" width="174" height="20" rx="6" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1"/>
+          <text x="811" y="224" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:8.5px" text-anchor="middle">export — design files</text>
+          <!-- codebase glyph -->
+          <g transform="translate(820,250)">
+            <rect x="0" y="0" width="120" height="80" rx="8" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+            <text x="12" y="20" style="fill:var(--text);font-family:var(--font-sans);font-size:11px;font-weight:600">Codebase</text>
+            <rect x="12" y="30" width="96" height="13" rx="3" style="fill:none;stroke:var(--hairline);stroke-width:1"/>
+            <text x="17" y="40" style="fill:var(--secondary);font-family:var(--font-mono);font-size:8.5px">tokens.css</text>
+            <rect x="12" y="46" width="96" height="13" rx="3" style="fill:none;stroke:var(--hairline);stroke-width:1"/>
+            <text x="17" y="56" style="fill:var(--secondary);font-family:var(--font-mono);font-size:8.5px">design.md</text>
+            <rect x="12" y="62" width="96" height="13" rx="3" style="fill:none;stroke:var(--hairline);stroke-width:1"/>
+            <text x="17" y="72" style="fill:var(--secondary);font-family:var(--font-mono);font-size:8.5px">components</text>
+          </g>
+        </svg>
+      </div>
+      <p class="caption" style="text-align:center">studio &rarr; deploy &rarr; client's machine &rarr; ai reads/writes &rarr; export to codebase</p>
+      <p class="legend">— accent traces the live path · dashed border = the client's machine</p>
+    </div>
+  </div>
+
+  <!-- 04 THREE PARTS -->
+  <section id="s04" aria-labelledby="h04">
+    <div class="sec-head">
+      <span class="numeral">03</span>
+      <p class="kicker">The three parts</p>
+      <h2 id="h04">Studio, client tool, and the data.</h2>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <span class="rnum">1</span>
+        <div class="rbody">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            The Studio <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">our side</span>
+          </h3>
+          <p>We set up and fine-tune a client's design system from their existing notes — shaping components and the rules for using them — then deliver their own copy.</p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="rnum">2</span>
+        <div class="rbody">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            The Client Tool <span style="color:var(--muted);font-family:var(--font-mono);font-size:.7rem;font-weight:400;letter-spacing:.04em">their side</span>
+          </h3>
+          <p>The copy each client runs on their own machine, used three ways: a visual app to see and play with the whole system, a hands-on toolkit for direct or automated work, and a live connection their AI assistant plugs into. Each copy is locked to one product.</p>
+        </div>
+      </div>
+      <div class="row">
+        <span class="rnum">3</span>
+        <div class="rbody">
+          <h3>
+            <svg width="14" height="14" viewBox="0 0 14 14" role="img" aria-label="tick"><path d="M2 7.5 L5.5 11 L12 3" style="stroke:var(--accent);stroke-width:1.75;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            The Data
+          </h3>
+          <p>Supporting material — brand guides, product specs — sitting alongside the system so the AI has the full picture, not just the parts.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 WHAT'S INSIDE -->
+  <section id="s05" aria-labelledby="h05">
+    <div class="sec-head">
+      <span class="numeral">04</span>
+      <p class="kicker">What's inside the client tool</p>
+      <h2 id="h05">A box of parts — with instructions.</h2>
+    </div>
+    <p class="lead">Not just a box of parts — a box of parts with instructions.</p>
+    <div class="svg-block">
+      <svg viewBox="0 0 720 300" role="img" aria-labelledby="g05t g05d" preserveAspectRatio="xMidYMid meet">
+        <title id="g05t">Exploded stack of the client tool</title>
+        <desc id="g05d">Three thin equal tabs — visual app, toolkit and AI connection — each drop a connector into one wide shared store slab partitioned into four cells: tokens, components plus rules, icons and assets, and screens and flows.</desc>
+        <defs>
+          <marker id="ah-05" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--accent)"/></marker>
+        </defs>
+        <g style="font-family:var(--font-sans);font-size:13px">
+          <rect x="60" y="24" width="180" height="40" rx="8" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+          <text x="150" y="49" style="fill:var(--secondary)" text-anchor="middle">Visual app</text>
+          <rect x="270" y="24" width="180" height="40" rx="8" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+          <text x="360" y="49" style="fill:var(--secondary)" text-anchor="middle">Toolkit</text>
+          <rect x="480" y="24" width="180" height="40" rx="8" style="fill:var(--surface);stroke:var(--hairline);stroke-width:1.25"/>
+          <text x="570" y="49" style="fill:var(--secondary)" text-anchor="middle">AI connection</text>
+        </g>
+        <g style="stroke:var(--accent);stroke-width:2;fill:none">
+          <path d="M150 64 V104" marker-end="url(#ah-05)"/>
+          <path d="M360 64 V104" marker-end="url(#ah-05)"/>
+          <path d="M570 64 V104" marker-end="url(#ah-05)"/>
+        </g>
+        <rect x="60" y="112" width="600" height="150" rx="8" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:1.5"/>
+        <rect x="60" y="112" width="3" height="150" style="fill:var(--accent)"/>
+        <text x="78" y="138" style="fill:var(--accent-text);font-family:var(--font-mono);font-size:11px;letter-spacing:.03em">SHARED STORE · source of truth</text>
+        <g style="stroke:var(--accent);stroke-width:1" opacity="0.4">
+          <line x1="210" y1="152" x2="210" y2="246"/>
+          <line x1="360" y1="152" x2="360" y2="246"/>
+          <line x1="510" y1="152" x2="510" y2="246"/>
+        </g>
+        <g style="font-family:var(--font-mono);font-size:12px;fill:var(--accent-text)" text-anchor="middle">
+          <text x="135" y="204">Tokens</text>
+          <text x="285" y="198">Components</text>
+          <text x="285" y="214">+ rules</text>
+          <text x="435" y="198">Icons &amp;</text>
+          <text x="435" y="214">assets</text>
+          <text x="585" y="198">Screens</text>
+          <text x="585" y="214">&amp; flows</text>
+        </g>
+      </svg>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Design tokens</h3>
+        <p>The core values: colors, spacing, fonts, sizes. Change them once here and they update everywhere in the code.</p>
+      </div>
+      <div class="card">
+        <h3>Atoms to full components</h3>
+        <p>The smallest pieces — a color, a button, an input — up to complete components. Each carries its own usage rules: when to use, when not to, what to use instead, and which tokens it should use. This is what lets the AI choose the right component and token instead of guessing.</p>
+      </div>
+      <div class="card">
+        <h3>Icons &amp; assets</h3>
+        <p>A built-in library for icons, logos, and images — like a lightweight content system — so the AI always pulls the approved asset.</p>
+      </div>
+    </div>
+    <p class="pull">It's a box of parts with instructions — so both people and AI know exactly what to use and when.</p>
+  </section>
+
+  <!-- 06 MCP -->
+  <section id="s06" aria-labelledby="h06">
+    <div class="sec-head">
+      <span class="numeral">05</span>
+      <p class="kicker">How the AI plugs in</p>
+      <h2 id="h06">A live link, not a stale copy.</h2>
+    </div>
+    <p class="body">The client's AI connects through a live link — an <span class="mono">MCP</span> connection, the standard way AI assistants use outside tools. Through it, while it builds, the AI can:</p>
+    <div class="verbs">
+      <div class="verb"><span class="vt">LOOK THINGS UP</span><p>"Which component fits here?" "What's the right spacing value?"</p></div>
+      <div class="verb"><span class="vt">GET ITS PLAN CHECKED</span><p>The tool flags anything that breaks the design rules <strong>before</strong> a line of code is written.</p></div>
+      <div class="verb"><span class="vt">WRITE BACK</span><p>Anything new the AI builds is saved into the shared memory for next time.</p></div>
+    </div>
+    <div class="lint">
+      <div class="lint-row ok">
+        <svg width="15" height="15" viewBox="0 0 15 15" role="img" aria-label="pass"><path d="M2.5 8 L6 11.5 L12.5 3.5" style="stroke:var(--accent);stroke-width:1.9;fill:none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        uses approved Button + spacing token
+      </div>
+      <div class="lint-row bad">
+        <svg width="15" height="15" viewBox="0 0 15 15" role="img" aria-label="flagged"><path d="M3.5 3.5 L11.5 11.5 M11.5 3.5 L3.5 11.5" style="stroke:var(--warn);stroke-width:1.9;fill:none" stroke-linecap="round"/></svg>
+        off-token color &rarr; flagged before code
+      </div>
+    </div>
+    <p class="note">Because the link is live, the AI always works from the current system, not a stale copy. For simpler cases the system is also exported as plain files the AI can read — the live link is what powers the real back-and-forth.</p>
+  </section>
+
+  <!-- 07 PRACTICE + LOOP -->
+  <section id="s07" aria-labelledby="h07">
+    <div class="sec-head">
+      <span class="numeral">06</span>
+      <p class="kicker">How it works in practice</p>
+      <h2 id="h07">From setup to a self-enriching loop.</h2>
+    </div>
+    <ol class="steps">
+      <li>We set up a client's design system in the Studio and hand them their own copy.</li>
+      <li>They open the visual app to explore the system and plan a feature — sketching screens and flows, picking components.</li>
+      <li>The tool bundles exactly what's relevant and hands it to the client's AI.</li>
+      <li>The AI builds the feature — checking each choice against the rules as it goes — and files anything new back into the shared memory.</li>
+      <li>The updated system is automatically written into their codebase as ready-to-use design files.</li>
+    </ol>
+    <div class="loop-wrap">
+      <svg viewBox="0 0 360 360" role="img" aria-labelledby="g07t g07d" preserveAspectRatio="xMidYMid meet">
+        <title id="g07t">The loop</title>
+        <desc id="g07d">Four nodes — plan, build, remember, repeat — connected clockwise by accent curved arrows. Remember carries the shared-memory disc motif.</desc>
+        <defs>
+          <marker id="ah-07" markerWidth="9" markerHeight="9" refX="6.5" refY="3.2" orient="auto"><path d="M0 0 L7 3.2 L0 6.4 Z" style="fill:var(--accent)"/></marker>
+        </defs>
+        <!-- curved connectors clockwise between the four node circles (r=44) -->
+        <g style="stroke:var(--accent);stroke-width:2;fill:none">
+          <path d="M156 88 A60 60 0 0 1 204 88" marker-end="url(#ah-07)"/>
+          <path d="M254 136 A60 60 0 0 1 254 224" marker-end="url(#ah-07)"/>
+          <path d="M204 272 A60 60 0 0 1 156 272" marker-end="url(#ah-07)"/>
+          <path d="M106 224 A60 60 0 0 1 106 136" marker-end="url(#ah-07)"/>
+        </g>
+        <!-- nodes -->
+        <!-- plan top-left -->
+        <g>
+          <circle cx="110" cy="92" r="44" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+          <rect x="92" y="74" width="36" height="26" rx="3" style="fill:none;stroke:var(--accent);stroke-width:1.5"/>
+          <line x1="92" y1="82" x2="128" y2="82" style="stroke:var(--accent);stroke-width:1.25"/>
+          <text x="110" y="120" style="fill:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:600" text-anchor="middle">plan</text>
+        </g>
+        <!-- build top-right -->
+        <g>
+          <circle cx="250" cy="92" r="44" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+          <text x="250" y="92" style="fill:var(--accent);font-family:var(--font-mono);font-size:16px" text-anchor="middle" dominant-baseline="middle">&lt;/&gt;</text>
+          <text x="250" y="120" style="fill:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:600" text-anchor="middle">build</text>
+        </g>
+        <!-- remember bottom-right (disc motif) -->
+        <g>
+          <circle cx="250" cy="268" r="44" style="fill:var(--accent-tint);stroke:var(--accent);stroke-width:2"/>
+          <circle cx="250" cy="252" r="13" style="fill:none;stroke:var(--accent);stroke-width:1.5"/>
+          <text x="250" y="284" style="fill:var(--accent-text);font-family:var(--font-sans);font-size:13px;font-weight:600" text-anchor="middle">remember</text>
+        </g>
+        <!-- repeat bottom-left -->
+        <g>
+          <circle cx="110" cy="268" r="44" style="fill:var(--surface);stroke:var(--hairline-strong);stroke-width:1.25"/>
+          <path d="M98 262 a12 12 0 1 1 3 9" style="fill:none;stroke:var(--accent);stroke-width:1.5" marker-end="url(#ah-07)"/>
+          <text x="110" y="296" style="fill:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:600" text-anchor="middle">repeat</text>
+        </g>
+      </svg>
+    </div>
+    <p class="caption" style="text-align:center">A loop: every feature makes the system richer.</p>
+  </section>
+
+  <!-- 08 GOING FURTHER -->
+  <section id="s08" aria-labelledby="h08">
+    <div class="sec-head">
+      <span class="numeral">07</span>
+      <p class="kicker">Going further: architecture &amp; flows</p>
+      <h2 id="h08">A richer layer on top of the essentials.</h2>
+    </div>
+    <p class="body">Beyond the design system itself, the tool can map the product — its screens (the information architecture) and how people move between them (user flows). A designer sketches a new feature's flow visually, and the tool turns it into a precise brief for the AI to build from.</p>
+    <p class="body">This goes further than most design systems. It's a layer added on top of the essentials rather than a day-one requirement — but it's what makes planning and building a whole feature feel seamless, instead of just dropping in a single component.</p>
+    <div class="inset">
+      <p class="t">Add-on layer</p>
+      <p>Map the screens, draw the flows, hand the AI a precise brief — so a whole feature, not just one component, comes together coherently.</p>
+    </div>
+  </section>
+
+  <!-- 09 WHY DIFFERENT -->
+  <section id="s09" aria-labelledby="h09">
+    <div class="sec-head">
+      <span class="numeral">08</span>
+      <p class="kicker">Why it's different</p>
+      <h2 id="h09">Three things that set it apart.</h2>
+    </div>
+    <div class="rows why">
+      <div class="row" style="grid-template-columns:1fr">
+        <div class="rbody">
+          <h3>A living memory, not stale docs</h3>
+          <p>The system updates itself as the product grows, so it never falls out of date.</p>
+        </div>
+      </div>
+      <div class="row" style="grid-template-columns:1fr">
+        <div class="rbody">
+          <h3>The AI makes consistent decisions</h3>
+          <p>It doesn't just store components — it knows when to use which, and checks the plan against the rules before any code.</p>
+        </div>
+      </div>
+      <div class="row" style="grid-template-columns:1fr">
+        <div class="rbody">
+          <h3 style="display:flex;align-items:center;gap:.55rem">
+            The data stays with the client
+            <svg width="16" height="16" viewBox="0 0 16 16" role="img" aria-label="lock"><rect x="3" y="7" width="10" height="7" rx="1.5" style="fill:none;stroke:var(--accent);stroke-width:1.5"/><path d="M5 7 V5 a3 3 0 0 1 6 0 V7" style="fill:none;stroke:var(--accent);stroke-width:1.5"/></svg>
+          </h3>
+          <p>Each client runs their own copy on their own machine; their design system never leaves their hands.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <main style="padding-top:0;padding-bottom:0">
+    <hr class="accent-rule">
+    <p class="foot-sum">It turns a product's design system into a shared memory that keeps a team's AI assistant building consistently — and gets smarter with every feature.</p>
+    <p class="credit">Design system platform · how it works</p>
+  </main>
+</footer>
+
+</body>
+</html>
