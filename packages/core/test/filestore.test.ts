@@ -9,6 +9,10 @@ import {
   listTokens,
   getComponent,
   upsertComponent,
+  upsertPattern,
+  listPatterns,
+  upsertGuideline,
+  listGuidelines,
   setToken,
   deleteToken,
   upsertDoc,
@@ -72,6 +76,31 @@ describe('FileStore — a human-readable repo of files', () => {
 
     expect(deleteToken(store, 'color.brand.accent')).toBe(true);
     expect(listTokens(store).map((t) => t.path).sort()).toEqual(before);
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  // Regression: the CLI passes `undefined` for unset optional fields
+  // (pattern's componentsUsed/rationale, guideline's governs). js-yaml throws
+  // on undefined values, so the FileStore must strip them before dumping
+  // front-matter — otherwise `dsk pattern`/`dsk guideline` crash on a file repo.
+  it('patterns and guidelines with unset optional fields do not crash the YAML dumper', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'dsk-fs-'));
+    const store = new FileStore(join(tmp, 'design-system'));
+
+    expect(() =>
+      upsertPattern(store, 'Inline undo', {
+        problem: 'accidental deletes',
+        solution: 'Toast with Undo',
+        componentsUsed: undefined,
+        rationale: undefined,
+      }),
+    ).not.toThrow();
+    expect(() =>
+      upsertGuideline(store, 'Accent sparingly', { rule: 'one CTA per view', scope: undefined, governs: undefined }),
+    ).not.toThrow();
+
+    expect(listPatterns(store).map((p) => p.name)).toContain('Inline undo');
+    expect(listGuidelines(store).map((g) => g.name)).toContain('Accent sparingly');
     rmSync(tmp, { recursive: true, force: true });
   });
 

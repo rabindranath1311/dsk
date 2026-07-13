@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dsk — State of the System</title>
+<style>
+  :root{
+    --bg:#08090a; --bg-2:#0d0e10; --panel:#111214; --panel-2:#151619;
+    --line:#1e2024; --line-2:#2a2c31;
+    --ink:#e7e8ea; --ink-2:#b3b6bd; --muted:#7a7f89;
+    --indigo:#5e6ad2; --indigo-soft:#8b93e6; --lime:#e4f222;
+    --green:#3fb950; --amber:#d6a323; --red:#f0603a;
+    --k-token:#ca8a04; --k-comp:#a855f7; --k-ia:#0ea5e9; --k-flow:#6366f1;
+    --k-screen:#14b8a6; --k-doc:#ec4899; --k-pattern:#f59e0b; --k-guide:#94a3b8;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,monospace;
+    --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#111524 0%,var(--bg) 55%);
+    color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;font-size:15px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+  a{color:var(--indigo-soft);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,.mono{font-family:var(--mono);font-size:.86em}
+  code{background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.06em .38em;color:#d7dae0}
+  h1,h2,h3{line-height:1.2;letter-spacing:-.02em;font-weight:600}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+  /* header */
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+  .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;
+    padding:4px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-2)}
+  .pill .dot{width:7px;height:7px;border-radius:50%}
+  .dot.g{background:var(--green)} .dot.a{background:var(--amber)} .dot.r{background:var(--red)} .dot.i{background:var(--indigo)}
+  header h1{font-size:40px;margin:18px 0 6px}
+  header .lede{font-size:17px;color:var(--ink-2);max-width:70ch;margin:0}
+  .meta{margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+  section{padding:44px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:24px;margin:0 0 6px}
+  section .sub{color:var(--muted);margin:0 0 26px;max-width:72ch}
+
+  /* the overall meter */
+  .overall{display:grid;grid-template-columns:150px 1fr;gap:28px;align-items:center;
+    background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line-2);
+    border-radius:16px;padding:26px 28px}
+  .ring{position:relative;width:150px;height:150px}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .n{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .n b{font-size:34px;font-weight:700;letter-spacing:-.03em}
+  .ring .n span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .overall p{margin:0 0 10px;color:var(--ink-2)}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+
+  /* faces diagram */
+  .faces{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:6px}
+  .store{margin-top:14px;border:1px dashed var(--line-2);border-radius:14px;padding:18px 20px;
+    background:linear-gradient(180deg,rgba(94,106,210,.07),transparent)}
+  .store .t{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo-soft)}
+  .store .d{color:var(--ink-2);margin-top:4px;font-size:14px}
+  .face{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .face .ic{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .face h3{margin:8px 0 6px;font-size:16px}
+  .face p{margin:0;color:var(--ink-2);font-size:13.5px}
+  .face .cmd{margin-top:10px;font-family:var(--mono);font-size:11.5px;color:var(--lime)}
+
+  /* grade cards */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+  .card.done::before{background:var(--green)} .card.part::before{background:var(--amber)} .card.no::before{background:var(--red)}
+  .card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .card h3{font-size:15.5px;margin:0}
+  .grade{font-family:var(--mono);font-weight:700;font-size:15px;padding:2px 9px;border-radius:7px;white-space:nowrap}
+  .grade.g{color:#0b1a0e;background:var(--green)} .grade.a{color:#1c1400;background:var(--amber)} .grade.r{color:#210a04;background:var(--red)}
+  .card .status{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin:8px 0 4px}
+  .st-done{color:var(--green)} .st-part{color:var(--amber)} .st-no{color:var(--red)}
+  .card p{margin:6px 0 0;font-size:13.5px;color:var(--ink-2)}
+  .ev{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+  .ev li{font-family:var(--mono);font-size:11px;color:var(--ink-2);background:var(--panel-2);
+    border:1px solid var(--line);border-radius:6px;padding:3px 8px}
+  .ev li::before{content:"✓ ";color:var(--green)}
+  .ev.gap li::before{content:"→ ";color:var(--amber)}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td .mono{color:var(--ink)}
+
+  .kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .kind{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);
+    border-radius:9px;padding:7px 11px;font-size:13px}
+  .kind .sw{width:9px;height:9px;border-radius:2px}
+  .kind small{color:var(--muted);font-size:11.5px}
+
+  .flow-loop{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:8px}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 15px;flex:1;min-width:150px}
+  .step .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo-soft)}
+  .step .h{font-weight:600;margin-top:3px}
+  .step .d{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .arrow{color:var(--line-2);font-size:20px}
+
+  .note{background:linear-gradient(180deg,rgba(240,96,58,.06),transparent);border:1px solid var(--line-2);
+    border-left:3px solid var(--red);border-radius:10px;padding:16px 20px}
+  .note.fixed{border-left-color:var(--green);background:linear-gradient(180deg,rgba(63,185,80,.06),transparent)}
+  .note h3{margin:0 0 6px;font-size:15px}
+  .note p{margin:6px 0 0;font-size:13.5px;color:var(--ink-2)}
+
+  pre{background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#cdd0d6}
+  pre .c{color:var(--muted)} pre .g{color:var(--lime)}
+  footer{padding:40px 0 70px;color:var(--muted);font-size:13px}
+
+  @media(max-width:760px){
+    .faces{grid-template-columns:1fr}.grid{grid-template-columns:1fr}
+    .overall{grid-template-columns:1fr;justify-items:center;text-align:center}
+    header h1{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">dsk · design-system toolkit</div>
+    <h1>State of the System</h1>
+    <p class="lede">What we've actually built — a single self-contained toolkit for one product's design system — with an evidence-backed grade of what works and what's left. Every green mark below was run and observed, not assumed.</p>
+    <div class="badge-row">
+      <span class="pill"><span class="dot g"></span>27 tests passing</span>
+      <span class="pill"><span class="dot g"></span>5 packages typecheck clean</span>
+      <span class="pill"><span class="dot i"></span>10 MCP tools live</span>
+      <span class="pill"><span class="dot g"></span>1 bug found &amp; fixed this audit</span>
+    </div>
+    <div class="meta">Verified 2026-07-13 · single-project model (Layer 1 removed) · monorepo @ /Developer/Design-systems</div>
+  </div>
+</header>
+
+<!-- OVERALL -->
+<section>
+  <div class="wrap">
+    <div class="overall">
+      <div class="ring">
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          <circle cx="75" cy="75" r="64" fill="none" stroke="#1e2024" stroke-width="13"/>
+          <circle cx="75" cy="75" r="64" fill="none" stroke="url(#gg)" stroke-width="13" stroke-linecap="round"
+            stroke-dasharray="402" stroke-dashoffset="60"/>
+          <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#5e6ad2"/><stop offset="1" stop-color="#3fb950"/></linearGradient></defs>
+        </svg>
+        <div class="n"><b>85%</b><span>built</span></div>
+      </div>
+      <div>
+        <p><strong>The working product is done and verified.</strong> You can build a design system, see it, and have an AI agent read, check against, and author back into it — end to end, on real data. The remaining 15% is not features: it's <em>distribution</em> (making <code>dsk</code> installable on a machine that doesn't have this repo) plus cosmetic cleanup and naming.</p>
+        <div class="legend">
+          <span><span class="dot g"></span>Done &amp; verified live</span>
+          <span><span class="dot a"></span>Works, partial coverage / debt</span>
+          <span><span class="dot r"></span>Not built yet</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT IS -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">the shape</div>
+    <h2>One folder = one design system</h2>
+    <p class="sub">No studio, no multi-project orchestrator, no client copies. A single package (<code>@dsk/core</code>) holds the design-system <strong>store</strong> at its center — the living memory — and three faces sit over it. The store is the source of truth; everything else is a projection of it.</p>
+    <div class="store">
+      <div class="t">◆ The store — the design system itself</div>
+      <div class="d">A human-readable markdown file repo (<code>dsk init --files</code>) or SQLite. Tokens, components + their usage rules, patterns, guidelines, IA, flows, docs, assets.</div>
+    </div>
+    <div class="faces">
+      <div class="face">
+        <div class="ic">face 1 · builder</div>
+        <h3>The <code>dsk</code> CLI</h3>
+        <p>The machine that helps you build the system: set tokens, define components with usage rules, add patterns/guidelines, import, export.</p>
+        <div class="cmd">$ dsk token set · component · export</div>
+      </div>
+      <div class="face">
+        <div class="ic">face 2 · viewer</div>
+        <h3><code>dsk serve</code></h3>
+        <p>A React app that boots straight into this one design system: token gallery, atomic component browser, IA + user-flow canvas, docs, assets.</p>
+        <div class="cmd">$ dsk serve → localhost:4321</div>
+      </div>
+      <div class="face">
+        <div class="ic">face 3 · agent</div>
+        <h3>MCP + exports</h3>
+        <p>The AI's live connection (10 MCP tools) + a static export bundle, so Claude Code can look things up, get its plan checked, and write new work back.</p>
+        <div class="cmd">.mcp.json · design.md · AGENTS.md</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE GRADE (centerpiece) -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">the grade</div>
+    <h2>What works, with evidence</h2>
+    <p class="sub">Graded by area. The ✓ chips are things I ran and observed during this audit; the → chips on red/amber cards are the specific gaps.</p>
+    <div class="grid">
+
+      <div class="card done">
+        <div class="top"><h3>Core kernel &amp; store</h3><span class="grade g">A</span></div>
+        <div class="status st-done">done &amp; verified</div>
+        <p>The node model + two interchangeable backends. Both initialise, import a seed, and read back.</p>
+        <ul class="ev">
+          <li>file repo → markdown on disk</li><li>SQLite → store.db</li><li>8 node kinds</li><li>27 unit tests</li>
+        </ul>
+      </div>
+
+      <div class="card done">
+        <div class="top"><h3>Builder — the <code>dsk</code> CLI</h3><span class="grade g">A–</span></div>
+        <div class="status st-done">done &amp; verified</div>
+        <p>Every command exercised live against a real project. One file-repo bug surfaced and was fixed in this pass (see below).</p>
+        <ul class="ev">
+          <li>init · import · token · component</li><li>pattern · guideline</li><li>export · feature · mcp-config</li>
+        </ul>
+      </div>
+
+      <div class="card done">
+        <div class="top"><h3>Decision intelligence</h3><span class="grade g">A</span></div>
+        <div class="status st-done">done &amp; verified — the differentiator</div>
+        <p>The part that lets an agent choose instead of guess. Outputs checked for correctness, not just for running.</p>
+        <ul class="ev">
+          <li>recommend → ranked ConfirmDialog</li><li>lint → caught wrong + unknown component</li><li>lint → surfaced governing guideline</li><li>feature → scoped build prompt</li>
+        </ul>
+      </div>
+
+      <div class="card done">
+        <div class="top"><h3>Exports bundle</h3><span class="grade g">A</span></div>
+        <div class="status st-done">done &amp; verified — contents inspected</div>
+        <p>Not just written — read back and confirmed complete and correct.</p>
+        <ul class="ev">
+          <li>tokens.css: alias → var()</li><li>design.md: all 7 sections</li><li>design.md: prose use-cases</li><li>AGENTS.md · SKILL.md · .mcp.json</li>
+        </ul>
+      </div>
+
+      <div class="card done">
+        <div class="top"><h3>Agent surface — MCP</h3><span class="grade g">A</span></div>
+        <div class="status st-done">done &amp; verified — full round-trip</div>
+        <p>MCP-over-HTTP served by <code>dsk serve</code>. A new component authored by the agent flowed all the way to disk and into the exported docs.</p>
+        <ul class="ev">
+          <li>tools/list → 10 tools</li><li>create_component (+prose) → disk</li><li>get_component read body back</li><li>set_token · lint_usage</li>
+        </ul>
+      </div>
+
+      <div class="card part">
+        <div class="top"><h3>Viewer — the React app</h3><span class="grade a">B+</span></div>
+        <div class="status st-part">works · partial live coverage</div>
+        <p>Boots straight into the single project with zero console errors. Three views driven live this audit; the rest are API-backed and render, but weren't each re-exercised by hand here.</p>
+        <ul class="ev">
+          <li>Overview (real counts)</li><li>Components (atomic + usage)</li><li>Flow canvas (bands + edges)</li>
+        </ul>
+        <ul class="ev gap">
+          <li>IA/Screens/Docs/Assets not hand-driven this pass</li>
+        </ul>
+      </div>
+
+      <div class="card no">
+        <div class="top"><h3>Distribution / installable</h3><span class="grade r">D</span></div>
+        <div class="status st-no">not built — the real remaining work</div>
+        <p>Inside this repo the <code>dsk</code> command runs (linked bin, <code>--version</code> → 0.0.1). But there's no way to install it on a machine that doesn't have the monorepo.</p>
+        <ul class="ev gap">
+          <li>@dsk/* not published to npm</li><li>no standalone compiled binary</li><li>bin is a tsx launcher (needs node_modules)</li>
+        </ul>
+      </div>
+
+      <div class="card part">
+        <div class="top"><h3>Cleanup &amp; naming</h3><span class="grade a">C+</span></div>
+        <div class="status st-part">cosmetic debt</div>
+        <p>Leftovers from removing Layer 1, plus the working name. Harmless today, worth tidying before shipping.</p>
+        <ul class="ev gap">
+          <li>dormant fields: origin · visibility · config.recipe</li><li>packages still named @dsk/* (placeholder)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BUG -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">honesty check</div>
+    <h2>What the audit caught</h2>
+    <p class="sub">You asked me not to claim anything that isn't verifiably working. Running the system for real turned up one genuine defect — reported here rather than hidden.</p>
+    <div class="note fixed">
+      <h3>🐛 → ✅ Fixed: <code>dsk pattern</code> / <code>dsk guideline</code> crashed on a file-repo project</h3>
+      <p>When an optional field was omitted, the CLI passed <code>undefined</code> into the markdown front-matter, and the YAML dumper throws on <code>undefined</code>. The SQLite backend was unaffected (it serializes through JSON), so it had gone unnoticed — but the file repo is the <em>default</em> storage. Fixed by normalizing the data the same way SQLite does before writing, and locked in with a regression test (test count 26 → 27).</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA MODEL -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">under the hood</div>
+    <h2>The data model &amp; the packages</h2>
+    <p class="sub">Everything in the memory is a <strong>node</strong>; its <code>kind</code> picks the shape. The component kind — carrying <em>usage rules</em>, not just appearance — is what makes the agent's decisions good.</p>
+    <div class="kinds">
+      <span class="kind"><span class="sw" style="background:var(--k-token)"></span>token <small>DTCG value + alias</small></span>
+      <span class="kind"><span class="sw" style="background:var(--k-comp)"></span>component <small>+ usage rules &amp; prose</small></span>
+      <span class="kind"><span class="sw" style="background:var(--k-pattern)"></span>pattern</span>
+      <span class="kind"><span class="sw" style="background:var(--k-guide)"></span>guideline</span>
+      <span class="kind"><span class="sw" style="background:var(--k-ia)"></span>ia <small>app map</small></span>
+      <span class="kind"><span class="sw" style="background:var(--k-flow)"></span>flow <small>annotated</small></span>
+      <span class="kind"><span class="sw" style="background:var(--k-screen)"></span>screen</span>
+      <span class="kind"><span class="sw" style="background:var(--k-doc)"></span>doc <small>data layer</small></span>
+    </div>
+    <table>
+      <thead><tr><th>Package</th><th>Role</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">@dsk/core</span></td><td>the kernel — store, model, tokens, exporters, recommend, lint, feature</td><td><span class="st-done mono">✓ verified</span></td></tr>
+        <tr><td><span class="mono">@dsk/cli</span></td><td>the <code>dsk</code> command — the builder</td><td><span class="st-done mono">✓ verified</span></td></tr>
+        <tr><td><span class="mono">@dsk/mcp</span></td><td>the MCP server — the agent surface</td><td><span class="st-done mono">✓ verified</span></td></tr>
+        <tr><td><span class="mono">@dsk/server</span></td><td>Hono — JSON API + serves the app + MCP-over-HTTP</td><td><span class="st-done mono">✓ verified</span></td></tr>
+        <tr><td><span class="mono">@dsk/web</span></td><td>the React visualizer — the viewer</td><td><span class="st-part mono">✓ boots · partial</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- THE LOOP -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">how it runs</div>
+    <h2>The working loop</h2>
+    <p class="sub">This whole cycle was exercised on real data during the audit.</p>
+    <div class="flow-loop">
+      <div class="step"><div class="k">build</div><div class="h">Author the system</div><div class="d">CLI or MCP: tokens, components + rules</div></div>
+      <span class="arrow">→</span>
+      <div class="step"><div class="k">view / plan</div><div class="h">See &amp; plan</div><div class="d">dsk serve — browse, sketch a feature</div></div>
+      <span class="arrow">→</span>
+      <div class="step"><div class="k">agent uses</div><div class="h">Build &amp; check</div><div class="d">recommend · lint_usage before code</div></div>
+      <span class="arrow">→</span>
+      <div class="step"><div class="k">remember</div><div class="h">Write back</div><div class="d">new work → store → design.md</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT'S LEFT -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">the remaining 15%</div>
+    <h2>What's left, in priority order</h2>
+    <p class="sub">None of this is core capability — it's what stands between "works on my machine in the repo" and "hand it to someone else."</p>
+    <table>
+      <thead><tr><th>#</th><th>Work</th><th>Why</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><strong>Make <code>dsk</code> installable</strong> — publish <span class="mono">@dsk/*</span> to npm or compile a standalone binary</td><td>The only thing blocking delivery to a machine without this monorepo</td><td class="mono">M</td></tr>
+        <tr><td>2</td><td><strong>Strip dormant fields</strong> — <span class="mono">origin</span>, <span class="mono">visibility</span>, <span class="mono">config.recipe</span></td><td>Leftovers from Layer 1; a SQLite column touch</td><td class="mono">S</td></tr>
+        <tr><td>3</td><td><strong>Finish viewer coverage</strong> — hand-verify IA / Screens / Docs / Assets round-trips</td><td>They render &amp; are API-backed, but weren't each driven this pass</td><td class="mono">S</td></tr>
+        <tr><td>4</td><td><strong>Name the product</strong> — retire the <code>dsk</code> placeholder</td><td>Cosmetic; do it before publishing</td><td class="mono">S</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- RUN IT -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">reproduce it</div>
+    <h2>Run it yourself</h2>
+    <p class="sub">The exact path used in this audit. From the repo root.</p>
+    <pre><span class="c"># health</span>
+npm run typecheck        <span class="c"># 5 packages, clean</span>
+npm test                 <span class="c"># 27 passing</span>
+
+<span class="c"># build a design system (human-readable file repo)</span>
+mkdir acme &amp;&amp; cd acme
+npx dsk init --files --name "Acme"
+npx dsk import ../examples/seed.acme.json
+npx dsk recommend <span class="g">"confirm a destructive action"</span>   <span class="c"># → ConfirmDialog</span>
+npx dsk export           <span class="c"># → tokens.css · design.md · AGENTS.md · SKILL.md</span>
+
+<span class="c"># view it + serve the agent's MCP (one process)</span>
+npx dsk serve            <span class="c"># → localhost:4321  (visualizer + /mcp)</span></pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    dsk — design-system memory toolkit · State of the System, generated 2026-07-13 · every green mark verified by running the system.
+    See also <a href="HOW-IT-WORKS.html">HOW-IT-WORKS.html</a> and <a href="ARCHITECTURE_PRD.md">ARCHITECTURE_PRD.md</a>.
+  </div>
+</footer>
+</body>
+</html>

@@ -149,7 +149,11 @@ export class FileStore implements NodeStore {
     if (node.level) fm.level = node.level;
     fm.origin = node.origin;
     fm.visibility = node.visibility ?? 'studio';
-    Object.assign(fm, (node.data as Record<string, unknown>) ?? {});
+    // Strip `undefined` (recursively) before it reaches the YAML dumper — js-yaml
+    // throws on undefined values, and callers legitimately pass undefined for
+    // unset optional fields. JSON round-trip mirrors how the SQLite store
+    // serializes, so both backends accept the same input.
+    Object.assign(fm, JSON.parse(JSON.stringify((node.data as Record<string, unknown>) ?? {})));
     fm.created = node.created;
     fm.updated = node.updated;
     writeFileSync(join(dir, `${slugify(node.name)}.md`), matter.stringify(node.body ? `\n${node.body}\n` : '', fm));
