@@ -3,7 +3,16 @@
   "private": true,
   "type": "module",
   "version": "0.0.1",
-  "description": "Design-system memory toolkit (working name: dsk)",
+  "description": "dsk — design-system memory toolkit for humans and AI agents",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rabindranath1311/dsk.git"
+  },
+  "homepage": "https://rabindranath1311.github.io/dsk/",
+  "engines": {
+    "node": ">=20"
+  },
   "workspaces": [
     "packages/*"
   ],

@@ -3,6 +3,9 @@ dist/
 *.tsbuildinfo
 .DS_Store
 
+# local editor/agent config (contains machine-specific paths)
+.claude/
+
 # sqlite sidecar files (the store.db itself is meant to be committed)
 *.db-wal
 *.db-shm

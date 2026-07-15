@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dsk — design-system memory for humans and AI agents</title>
+<meta name="description" content="A self-contained toolkit that gives your product's design system a memory — tokens, components, usage rules, flows — readable by humans and AI coding assistants over MCP.">
+<meta property="og:title" content="dsk — design-system memory toolkit">
+<meta property="og:description" content="Build, visualize, and let AI agents use your design system. One folder = one design system.">
+<meta property="og:image" content="https://rabindranath1311.github.io/dsk/hero-tokens.png">
+<style>
+  :root {
+    --bg: #0b0b0d; --panel: #121216; --line: #26262c;
+    --text: #ececf1; --muted: #9a9aa6;
+    --accent: #6d7cff; --token: #e0a63a; --comp: #a06dff; --flow: #4aa3ff; --screen: #3ecf8e;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; gap: 20px; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; color: var(--text); }
+  .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--token); box-shadow: 0 0 10px var(--token); }
+  .nav .links { margin-left: auto; display: flex; gap: 20px; font-size: 14px; }
+  .nav .links a { color: var(--muted); }
+  .nav .links a:hover { color: var(--text); text-decoration: none; }
+  .nav .gh {
+    color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+    padding: 5px 14px; font-size: 13.5px; background: var(--panel);
+  }
+  .nav .gh:hover { border-color: var(--accent); text-decoration: none; }
+
+  .hero { padding: 84px 0 36px; text-align: center; }
+  .hero .kicker {
+    display: inline-block; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px;
+    margin-bottom: 26px; background: var(--panel);
+  }
+  h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.08; letter-spacing: -0.02em; font-weight: 700; }
+  h1 .grad {
+    background: linear-gradient(92deg, var(--token), var(--comp) 45%, var(--flow));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.sub { max-width: 640px; margin: 22px auto 0; color: var(--muted); font-size: 18px; }
+  .cta { margin-top: 34px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 11px 22px; border-radius: 10px; font-size: 15px; font-weight: 550;
+  }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.1); text-decoration: none; }
+  .btn.ghost { border: 1px solid var(--line); color: var(--text); background: var(--panel); }
+  .btn.ghost:hover { border-color: var(--accent); text-decoration: none; }
+
+  .shot { padding: 46px 0 10px; }
+  .shot .frame {
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.02);
+    background: var(--panel);
+  }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot .cap { text-align: center; color: var(--muted); font-size: 13px; margin-top: 14px; }
+
+  section.block { padding: 72px 0 8px; }
+  .block h2 { font-size: 28px; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .block > .wrap > p.lead { color: var(--muted); max-width: 620px; margin-bottom: 36px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px;
+  }
+  .card .k { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-bottom: 14px; }
+  .card h3 { font-size: 16px; margin-bottom: 8px; font-weight: 600; }
+  .card h3 code { font-family: var(--mono); font-size: 14px; color: var(--text); }
+  .card p { color: var(--muted); font-size: 14px; }
+
+  pre {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; line-height: 1.75;
+    color: var(--text);
+  }
+  pre .c { color: var(--muted); }
+  pre .p { color: var(--screen); }
+
+  .memory table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .memory th, .memory td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .memory th { color: var(--muted); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500; }
+  .memory td:first-child { white-space: nowrap; font-weight: 550; }
+  .memory td:last-child { color: var(--muted); }
+
+  footer { margin-top: 90px; border-top: 1px solid var(--line); padding: 34px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+  footer .spacer { margin-left: auto; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <span class="brand"><span class="dot"></span>dsk</span>
+    <nav class="links">
+      <a href="#faces">Toolkit</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#agents">For agents</a>
+      <a class="gh" href="https://github.com/rabindranath1311/dsk">GitHub&nbsp;→</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <span class="kicker">Open source · MIT</span>
+    <h1>Give your design system<br>a <span class="grad">memory</span></h1>
+    <p class="sub">
+      dsk stores your product's tokens, components, usage rules, flows, and screens
+      as structured data beside your code — readable by humans <em>and</em> by AI
+      coding assistants over MCP. One folder = one design system.
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/rabindranath1311/dsk">View on GitHub</a>
+      <a class="btn ghost" href="#quickstart">Quickstart</a>
+    </div>
+  </div>
+
+  <div class="wrap shot">
+    <div class="frame"><img src="hero-tokens.png" alt="The dsk visualizer showing the design tokens view" width="2880" height="1240"></div>
+    <div class="cap">The built-in visualizer — tokens, components, patterns, IA, flows, and screens over one store.</div>
+  </div>
+
+  <section class="block" id="faces">
+    <div class="wrap">
+      <h2>One core, three faces</h2>
+      <p class="lead">Everything is a projection over the same store — a human-readable file repo or SQLite.</p>
+      <div class="grid">
+        <div class="card">
+          <span class="k" style="background:var(--token)"></span>
+          <h3>Build — <code>dsk</code> CLI</h3>
+          <p>init, tokens, components, patterns, guidelines, import/export. DTCG-format tokens with aliases; exports regenerate <code>tokens.css</code>, <code>design.md</code>, <code>AGENTS.md</code>, <code>SKILL.md</code>.</p>
+        </div>
+        <div class="card">
+          <span class="k" style="background:var(--flow)"></span>
+          <h3>See — <code>dsk serve</code></h3>
+          <p>A React visualizer + JSON API in one process: token swatches, atomic-design component cards with use-when rules, draggable IA maps and user flows.</p>
+        </div>
+        <div class="card">
+          <span class="k" style="background:var(--comp)"></span>
+          <h3>Use — MCP agent surface</h3>
+          <p>Claude Code (or any MCP client) plugs in to search components by intent, check usage rules, lint proposed UI, and author new entries.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="quickstart">
+    <div class="wrap">
+      <h2>Quickstart</h2>
+      <p class="lead">Requires Node.js 20+. Clone, seed with the example design system, and serve.</p>
+      <pre><span class="c"># get it</span>
+git clone https://github.com/rabindranath1311/dsk
+cd dsk &amp;&amp; npm install
+
+<span class="c"># create a design system and load the example seed</span>
+npm run dsk -- init --name "Acme"
+npm run dsk -- import examples/seed.acme.json
+
+<span class="c"># build the visualizer once, then serve</span>
+npm run build:web
+npm run serve            <span class="c"># → http://localhost:4321</span></pre>
+    </div>
+  </section>
+
+  <section class="block" id="agents">
+    <div class="wrap">
+      <h2>Built for AI coding assistants</h2>
+      <p class="lead">
+        Components carry explicit <em>use-when / don't-use-when</em> rules, intents, do/don't lists,
+        and accessibility notes — so an agent picks the right component and obeys the system.
+      </p>
+      <div class="shot" style="padding-top:0">
+        <div class="frame"><img src="hero-components.png" alt="A component card with usage rules in the dsk visualizer" width="2880" height="1240" loading="lazy"></div>
+      </div>
+      <pre style="margin-top:26px"><span class="c"># connect Claude Code over MCP</span>
+npm run dsk -- mcp-config   <span class="c"># writes .mcp.json (HTTP → localhost:4321/mcp)</span>
+npm run serve               <span class="c"># keep the server running</span></pre>
+    </div>
+  </section>
+
+  <section class="block memory">
+    <div class="wrap">
+      <h2>What's in the memory</h2>
+      <p class="lead">Six kinds of design knowledge, versioned beside your code.</p>
+      <table>
+        <tr><th>Kind</th><th>What it captures</th></tr>
+        <tr><td>Tokens</td><td>DTCG design tokens (color, space, radius, type…) with aliases</td></tr>
+        <tr><td>Components</td><td>Atomic-design level, intents, variants, use-when / don't-use-when, do/don't, a11y, tokens used</td></tr>
+        <tr><td>Patterns &amp; guidelines</td><td>Recurring solutions and the cross-cutting rules that govern components</td></tr>
+        <tr><td>IA &amp; flows</td><td>App maps and user flows as draggable node graphs</td></tr>
+        <tr><td>Screens</td><td>Purpose, states, and the components each screen uses</td></tr>
+        <tr><td>Docs &amp; assets</td><td>PRDs, brand refs, research, icons — the grounding agents read</td></tr>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>dsk</span>
+    <span>MIT License</span>
+    <span class="spacer"></span>
+    <a href="https://github.com/rabindranath1311/dsk">GitHub</a>
+    <a href="https://github.com/rabindranath1311/dsk#quickstart">Docs</a>
+  </div>
+</footer>
+
+</body>
+</html>
