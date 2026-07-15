@@ -9,7 +9,7 @@ readable by humans *and* by AI coding assistants. One folder = one design
 system. It **builds** the design system, **shows** it, and lets an **agent use
 it** over MCP.
 
-**Website:** https://rabindranath1311.github.io/dsk/ · **How it works:** [HOW-IT-WORKS.md](HOW-IT-WORKS.md)
+**Website:** https://rabindranath1311.github.io/dsk-website/ · **How it works:** [HOW-IT-WORKS.md](HOW-IT-WORKS.md)
 
 ![The dsk visualizer — design tokens view](media/tokens.png)
 
