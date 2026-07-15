@@ -33,7 +33,7 @@ describe('FileStore — a human-readable repo of files', () => {
 
     expect(existsSync(join(ds, 'tokens.md'))).toBe(true);
     expect(existsSync(join(ds, 'components', 'Button.md'))).toBe(true);
-    expect(existsSync(join(ds, 'flows', 'delete-account.md'))).toBe(true);
+    expect(existsSync(join(ds, 'flows', 'Delete-account.md'))).toBe(true);
 
     // Button.md is human-readable: frontmatter carries the usage rules
     const fm = matter(readFileSync(join(ds, 'components', 'Button.md'), 'utf8')).data as any;
